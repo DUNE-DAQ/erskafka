@@ -12,3 +12,5 @@ export DUNEDAQ_ERS_INFO="erstrace,throttle(30,100),lstdout,erskafka(dunedaqutili
 export DUNEDAQ_ERS_WARNING="erstrace,throttle(30,100),lstderr,erskafka(dunedaqutilities/erskafka)"
 export DUNEDAQ_ERS_ERROR="erstrace,throttle(30,100),lstderr,erskafka(dunedaqutilities/erskafka)"
 export DUNEDAQ_ERS_FATAL="erstrace,lstderr,erskafka(dunedaqutilities/erskafka)"
+
+ERSKAFKA is not included in 2.6, if you are runnig 2.6, modify the build order to add erskafka directly after ERSES.
