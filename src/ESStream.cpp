@@ -20,6 +20,10 @@ ERS_REGISTER_OUTPUT_STREAM(erskafka::ESStream, "erskafka", param)
   */
 erskafka::ESStream::ESStream(const std::string &param)
 {
+
+  if(const char* env_p = std::getenv("DUNEDAQ_PARTITION")) 
+     m_partition = env_p;
+
   std::vector<std::string> params;
   std::stringstream ss(param);
   while (ss.good())
