@@ -23,32 +23,9 @@ erskafka::ESStream::ESStream(const std::string &param)
 
   if(const char* env_p = std::getenv("DUNEDAQ_PARTITION")) 
      m_partition = env_p;
-
-  std::vector<std::string> params;
-  std::stringstream ss(param);
-  while (ss.good())
-  {
-    std::string substr;
-    getline(ss, substr, ',');
-    params.push_back(substr);
-  }
-
-  if (params.size() > 0)
-  {
-    m_url = params[0];
-  }
-
-  if (params.size() > 1)
-  {
-    m_partition = params[1];
-  }
-  if (params.size() > 2)
-  {
-    m_cred = params[2];
-  }
-
+ 
   //Kafka server settings
-  std::string brokers = "dqmbroadcast:9092";
+  std::string brokers = param;
   std::string errstr;
 
   RdKafka::Conf *conf = RdKafka::Conf::create(RdKafka::Conf::CONF_GLOBAL);
