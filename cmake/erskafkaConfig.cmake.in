@@ -5,7 +5,6 @@ include(CMakeFindDependencyMacro)
 
 find_dependency(ers)
 find_dependency(nlohmann_json)
-find_dependency(cpr)
 
 
 if (EXISTS ${CMAKE_SOURCE_DIR}/@PROJECT_NAME@)

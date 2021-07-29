@@ -12,6 +12,7 @@
 #include <iostream>
 #include <chrono>
 #include <boost/crc.hpp>
+#include <vector>
 
 ERS_REGISTER_OUTPUT_STREAM(erskafka::KafkaStream, "erskafka", param)
 
@@ -32,9 +33,23 @@ namespace erskafka
 
     RdKafka::Conf *conf = RdKafka::Conf::create(RdKafka::Conf::CONF_GLOBAL);
     conf->set("bootstrap.servers", brokers, errstr);
-    conf->set("client.id", std::getenv("DUNEDAQ_APPLICATION_NAME"), errstr);
+    if(errstr != ""){
+      std::cout << "Bootstrap server error : " << errstr << '\n';
+    }
+    if(const char* env_p = std::getenv("DUNEDAQ_APPLICATION_NAME")) 
+      conf->set("client.id", env_p, errstr);
+    else
+      conf->set("client.id", "erskafkaproducerdefault", errstr);
+    if(errstr != ""){
+      std::cout << "Producer configuration error : " << errstr << '\n';
+    }
     //Create producer instance
     m_producer = RdKafka::Producer::create(conf, errstr);
+
+    if(errstr != ""){
+      std::cout << "Producer creation error : " << errstr << '\n';
+    }
+
   }
 
   void erskafka::KafkaStream::ers_to_json(const ers::Issue &issue, size_t chain, std::vector<nlohmann::json> &j_objs)
@@ -84,11 +99,9 @@ namespace erskafka
   {
     try
     {
-      /* RdKafka::Producer::RK_MSG_COPY to be investigated */
-      m_producer->produce(topic, RdKafka::Topic::PARTITION_UA, RdKafka::Producer::RK_MSG_COPY, const_cast<char *>(input.c_str()), input.size(), nullptr, 0, 0, nullptr, nullptr);
-      m_producer->purge(10000);
-      if (m_producer->outq_len() > 0)
-        std::cout << "% " << m_producer->outq_len() << " message(s) were not delivered" << std::endl;
+      // RdKafka::Producer::RK_MSG_COPY to be investigated
+      RdKafka::ErrorCode err = m_producer->produce(topic, RdKafka::Topic::PARTITION_UA, RdKafka::Producer::RK_MSG_COPY, const_cast<char *>(input.c_str()), input.size(), nullptr, 0, 0, nullptr, nullptr);
+      if (err != RdKafka::ERR_NO_ERROR) { std::cout << "% Failed to produce to topic " << topic << ": " << RdKafka::err2str(err) << std::endl;}
     }
     catch(const std::exception& e)
     {
@@ -123,9 +136,6 @@ namespace erskafka
       for (auto j : j_objs)
       {
         j["group_hash"] = crc32.checksum();
-        std::cout << std::endl;
-        std::cout << j.dump() << std::endl;
-        std::cout << std::endl;
 
         erskafka::KafkaStream::kafka_exporter(j.dump(), "erskafka-reporting");
       }
@@ -136,4 +146,4 @@ namespace erskafka
       std::cout << "Producer error : " << e.what() << '\n';
     }
   }
-}
+} // namespace erskafka
