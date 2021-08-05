@@ -1,18 +1,24 @@
-Configuration
-The erskafka plugin is configured through the ERS settings. Users that want make use of it need to define/extend the following ERS environment variables:
+## Configuration
+The erskafka plugin is configured through the [ERS](https://dune-daq-sw.readthedocs.io/en/latest/packages/ers/) settings. Users that want make use of it need to [set up a work area environment](https://dune-daq-sw.readthedocs.io/en/latest/packages/daq-buildtools/) and define/extend the following ERS environment variables as described on this page. 
 
-Tell ERS to load the erskafka plugin. The liberses.so shared library shall be in the LD_LIBRARY_PATH:
-
-Se the partition name. The partition name allows to clearly distinguish the origin of the ERS messages, thus avoiding mixing information from different DAQ instances:
-Extend the ERS variables which define the output streams to be used for Issues of different severities:
-
+Tell ERS to load the erskafka plugin:
+```
 export DUNEDAQ_ERS_STREAM_LIBS=erskafka
+```
+
+Set the partition name. The partition name allows to clearly distinguish the origin of the ERS messages, thus avoiding mixing information from different DAQ instances:
+```
 export DUNEDAQ_PARTITION=ChooseYourPartitionName
+```
+
+Extend the ERS variables which define the output streams to be used for Issues of different severities:
+```
 export DUNEDAQ_ERS_INFO="erstrace,throttle(30,100),lstdout,erskafka(dqmbroadcast:9092)"
 export DUNEDAQ_ERS_WARNING="erstrace,throttle(30,100),lstderr,erskafka(dqmbroadcast:9092)"
 export DUNEDAQ_ERS_ERROR="erstrace,throttle(30,100),lstderr,erskafka(dqmbroadcast:9092)"
 export DUNEDAQ_ERS_FATAL="erstrace,lstderr,erskafka(dqmbroadcast:9092)"
+```
 
-ERSKAFKA is not included in 2.6, if you are runnig 2.6, modify the build order to add erskafka directly after ERSES (by default work/sourcecode/dbt-build-order.cmake). Do check that you have access to the kafka library from dune externals (librdkafka        v1_7_0       e19:prof) from /cvmfs/dunedaq-development.opensciencegrid.org/products.
+erskafka is not included in the `dunedaq-2.6.0` frozen release, if you are running `dunedaq-v2.6.0`, modify the build order to add erskafka directly after [erses](https://dune-daq-sw.readthedocs.io/en/latest/packages/erses/) (by default `YourWorkarea/sourcecode/dbt-build-order.cmake`). Do check that you have access to the kafka library from dune externals (`librdkafka        v1_7_0       e19:prof`) from `/cvmfs/dunedaq-development.opensciencegrid.org/products`.
 
 Default platform: https://dunedaqreporting.app.cern.ch/ErrorReports
