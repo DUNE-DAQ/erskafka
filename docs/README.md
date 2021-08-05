@@ -16,3 +16,5 @@ export DUNEDAQ_ERS_FATAL="erstrace,lstderr,erskafka(dqmbroadcast:9092)"
 ERSKAFKA is not included in 2.6, if you are runnig 2.6, modify the build order to add erskafka directly after ERSES (by default work/sourcecode/dbt-build-order.cmake). Do check that you have access to the kafka library from dune externals (librdkafka        v1_7_0       e19:prof) from /cvmfs/dunedaq-development.opensciencegrid.org/products.
 
 Default platform: https://dunedaqreporting.app.cern.ch/ErrorReports
+
+For any further information, contact Yann Donon (yann.donon@cern.ch).
