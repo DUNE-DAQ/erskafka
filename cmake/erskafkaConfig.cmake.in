@@ -5,7 +5,8 @@ include(CMakeFindDependencyMacro)
 
 find_dependency(ers)
 find_dependency(nlohmann_json)
-
+find_dependency(RdKafka)
+find_dependency(Boost COMPONENTS iostreams)
 
 if (EXISTS ${CMAKE_SOURCE_DIR}/@PROJECT_NAME@)
 
