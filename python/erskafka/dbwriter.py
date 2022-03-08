@@ -50,22 +50,22 @@ cur = con.cursor()
 # Uncomment to create the table used for the database
 # cur.execute('''
 #             CREATE TABLE public."ErrorReports" (
-#             partition           TEXT,
+#             partition           INT,
 #             issue_name          TEXT,
 #             message             TEXT,
 #             severity            TEXT,
-#             usecs_since_epoch   TEXT,
+#             usecs_since_epoch   BIGINT,
 #             time                BIGINT,
 #             qualifiers          TEXT,
 #             params              TEXT,
-#             cwd                 TEXT,                 
+#             cwd                 TEXT,
 #             file_name           TEXT,
-#             function_name       TEXT,       
+#             function_name       TEXT,
 #             host_name           TEXT,
 #             package_name        TEXT,
 #             user_name           TEXT,
 #             application_name    TEXT,
-#             user_id             TEXT,
+#             user_id             INT,
 #             process_id          INT,
 #             thread_id           INT,
 #             line_number         INT,
@@ -83,7 +83,8 @@ for message in consumer:
     try:
         cur.execute(f'INSERT INTO public."ErrorReports" ({",".join(fields)}) VALUES({("%s, " * len(ls))[:-2]})', ls)
     except:
-        print('Query to insert in the database failed')
+        print('Query to insert in the database failed. This is the message received')
+        print(message)
 
     # Save the insert (or any change) to the database
     con.commit()
