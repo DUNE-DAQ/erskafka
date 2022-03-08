@@ -76,7 +76,6 @@ cur = con.cursor()
 
 # Infinte kafka loop
 for message in consumer:
-    print(message)
     js = json.loads(message.value)
     ls = [str(js[key]) for key in fields]
 
