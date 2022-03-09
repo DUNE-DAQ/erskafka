@@ -79,7 +79,7 @@ def cli(filename):
     #            '''
     #             )
 
-    # Infinte kafka loop
+    # Infinite loop over the kafka messages
     for message in consumer:
         js = json.loads(message.value)
         ls = [str(js[key]) for key in fields]
