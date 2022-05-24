@@ -51,11 +51,13 @@ def cli(filename):
     # cur.execute('''
     #             DROP TABLE public."ErrorReports";
     #             ''')
+    # con.commit()
+    # exit()
 
     # Uncomment to create the table used for the database
     # cur.execute('''
     #             CREATE TABLE public."ErrorReports" (
-    #             partition           INT,
+    #             partition           TEXT,
     #             issue_name          TEXT,
     #             message             TEXT,
     #             severity            TEXT,
@@ -78,6 +80,8 @@ def cli(filename):
     #            );
     #            '''
     #             )
+    # con.commit()
+    # exit()
 
     # Infinite loop over the kafka messages
     for message in consumer:
