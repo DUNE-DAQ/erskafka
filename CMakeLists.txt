@@ -15,6 +15,11 @@ daq_add_library(KafkaStream.cpp LINK_LIBRARIES ers::ers nlohmann_json::nlohmann_
 target_include_directories(erskafka PUBLIC)
 
 ##############################################################################
+# Python bindings
+
+daq_add_python_bindings(*.cpp LINK_LIBRARIES ${PROJECT_NAME})
+
+##############################################################################
 
 daq_install()
 
