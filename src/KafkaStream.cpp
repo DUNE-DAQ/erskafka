@@ -6,7 +6,7 @@
 * received with this code.
 */
 
-#include <erskafka/KafkaStream.hpp>
+#include "KafkaStream.hpp"
 #include <ers/StreamFactory.hpp>
 #include <string>
 #include <iostream>
