@@ -17,9 +17,30 @@
 #include <librdkafka/rdkafkacpp.h>
 
 #include <memory>
+#include <string>
 
 
 namespace dunedaq::erskafka {
+
+
+ERS_DECLAR_ISSUE(erskafka,
+                 MissingInfo,
+                 "JSON Missing " << json_entry,
+                 ((std::string)json_entry )
+
+ERS_DECLAR_ISSUE(erskafka,
+                 FailedConfig,
+                 json_entry << " failed to configure: " << message,
+                 ((std::string)json_entry)((std::string)message)
+
+
+ERS_DECLAR_ISSUE(erskafka,
+                 FailingCreatingStreamer,
+                 "ERS Streamer creation failed",
+                 ERS_EMPTY)
+
+
+
 
     class ERSPublisher {
 

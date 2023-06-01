@@ -12,6 +12,41 @@ using namespace dunedaq;
 
 namespace erskafka{
 
-ERSPublisher::ERSPublisher(const nlohmann::json& conf);
+ERSPublisher::ERSPublisher(const nlohmann::json& conf) {
+
+    RdKafka::Conf *conf = RdKafka::Conf::create(RdKafka::Conf::CONF_GLOBAL);
+    std::string errstr;
+
+    auto it = conf.find("bootstrap");
+    if ( it == conf.end() ) {
+        throw MissingInfo(ERS_HERE, "bootstrap");
+    }
+
+    conf->set("bootstrap.servers", *it, errstr);
+    if(errstr != ""){
+      throw FailedConfig("bootstrap.servers", errstr);
+    }
+
+    std::string cliend_id;
+    if(const char* env_p = std::getenv("DUNEDAQ_APPLICATION_NAME")) 
+        client_id = env_p;
+    else
+        client_id = "erskafkaproducerdefault";
+      
+    
+    conf->set("client.id", client_id, errstr);    
+    if(errstr != ""){
+       throw FailedConfig("client.id", errstr);
+    }
+
+    //Create producer instance
+    m_producer.reset(RdKafka::Producer::create(conf, errstr));
+
+    if(errstr != ""){
+      throw FailedConfig("Producer creation", errstr);
+    }
+
+
+}
 
 }
