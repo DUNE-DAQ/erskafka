@@ -27,8 +27,11 @@ ERSPublisher::ERSPublisher(const nlohmann::json& conf) {
       throw FailedConfig("bootstrap.servers", errstr);
     }
 
-    std::string cliend_id;
-    if(const char* env_p = std::getenv("DUNEDAQ_APPLICATION_NAME")) 
+    std::string client_id;
+    it = conf.find( "cliend_id" );
+    if ( it != conf.end() )
+        client_id = *it;
+    else if(const char* env_p = std::getenv("DUNEDAQ_APPLICATION_NAME")) 
         client_id = env_p;
     else
         client_id = "erskafkaproducerdefault";
@@ -46,7 +49,29 @@ ERSPublisher::ERSPublisher(const nlohmann::json& conf) {
       throw FailedConfig("Producer creation", errstr);
     }
 
+    it = conf.find("default_topic");
+    if (it != conf.end()) m_default_topic = *it;
 
+}
+
+bool ERSPublisher::publish( ers::IssueChain && issue ) const {
+
+  try
+    {
+
+      // convert the message in binary
+
+      // get the topic
+
+      // RdKafka::Producer::RK_MSG_COPY to be investigated
+      RdKafka::ErrorCode err = m_producer->produce(topic, RdKafka::Topic::PARTITION_UA, RdKafka::Producer::RK_MSG_COPY, const_cast<char *>(input.c_str()), input.size(), nullptr, 0, 0, nullptr, nullptr);
+      if (err != RdKafka::ERR_NO_ERROR) { std::cout << "% Failed to produce to topic " << topic << ": " << RdKafka::err2str(err) << std::endl;}
+    }
+    catch(const std::exception& e)
+    {
+      std::cout << "Producer error : " << e.what() << '\n';
+    }
+  }
 }
 
 }

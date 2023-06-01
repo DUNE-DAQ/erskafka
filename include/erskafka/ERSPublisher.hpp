@@ -59,14 +59,19 @@ ERS_DECLAR_ISSUE(erskafka,
 
         
         bool publish( ers::IssueChain && ) const;
-        template<class Iterator>
-        bool publish( Iterator begin, Iterator end) const;
+        // template<class Iterator>
+        // bool publish( Iterator begin, Iterator end) const;
+
+        protected:
+          std::string topic( [[maybe_unsed]] const ers::IssueChain & ) const {
+            
+          }
 
         private:
         
         std::unique_ptr<RdKafka::Producer> m_producer;
-
-
+        std::string m_default_topic = "ers_test";
+        
 
     };
 }
