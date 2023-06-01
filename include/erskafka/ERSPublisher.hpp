@@ -12,7 +12,12 @@
 #define ERSKAFKA_INCLUDE_ERSKAFKA_ERSPUBLISHER_HPP_
 
 #include "nlohmann/json.hpp"
-#include "ers/issue.pn.h"
+#include "ers/issue.pb.h"
+
+#include <librdkafka/rdkafkacpp.h>
+
+#include <memory>
+
 
 namespace dunedaq::erskafka {
 
@@ -24,13 +29,22 @@ namespace dunedaq::erskafka {
 
         ERSPublisher() = delete;
         ERSPublisher(const ERSPublisher & ) = delete;
+        ERSPublisher & operator = (const ERSPublisher & ) = delete;
         ERSPublisher(ERSPublisher && ) = delete;
+        ERSPublisher & operator = (ERSPublisher && ) = delete;
 
         ~ERSPublisher();
+
+
         
         bool publish( ers::IssueChain && ) const;
         template<class Iterator>
         bool publish( Iterator begin, Iterator end) const;
+
+        private:
+        
+        std::unique_ptr<RdKafka::Producer> m_producer;
+
 
 
     };
