@@ -8,23 +8,24 @@
 
 #include "erskafka/ERSPublisher.hpp"
 
-using namespace dunedaq;
+#include "erskafka/CommonIssues.hpp"
 
-namespace erskafka{
+using namespace dunedaq::erskafka;
+
 
 ERSPublisher::ERSPublisher(const nlohmann::json& conf) {
 
-    RdKafka::Conf *conf = RdKafka::Conf::create(RdKafka::Conf::CONF_GLOBAL);
+    RdKafka::Conf * k_conf = RdKafka::Conf::create(RdKafka::Conf::CONF_GLOBAL);
     std::string errstr;
 
     auto it = conf.find("bootstrap");
     if ( it == conf.end() ) {
-        throw MissingInfo(ERS_HERE, "bootstrap");
+      throw erskafka::MissingInfo(ERS_HERE, "bootstrap");
     }
 
-    conf->set("bootstrap.servers", *it, errstr);
+    k_conf->set("bootstrap.servers", *it, errstr);
     if(errstr != ""){
-      throw FailedConfig("bootstrap.servers", errstr);
+      throw erskafka::FailedConfig(ERS_HERE, "bootstrap.servers", errstr);
     }
 
     std::string client_id;
@@ -37,16 +38,16 @@ ERSPublisher::ERSPublisher(const nlohmann::json& conf) {
         client_id = "erskafkaproducerdefault";
       
     
-    conf->set("client.id", client_id, errstr);    
+    k_conf->set("client.id", client_id, errstr);    
     if(errstr != ""){
-       throw FailedConfig("client.id", errstr);
+      throw FailedConfig(ERS_HERE, "client.id", errstr);
     }
 
     //Create producer instance
-    m_producer.reset(RdKafka::Producer::create(conf, errstr));
+    m_producer.reset(RdKafka::Producer::create(k_conf, errstr));
 
     if(errstr != ""){
-      throw FailedConfig("Producer creation", errstr);
+      throw FailedConfig(ERS_HERE, "Producer creation", errstr);
     }
 
     it = conf.find("default_topic");
@@ -54,31 +55,30 @@ ERSPublisher::ERSPublisher(const nlohmann::json& conf) {
 
 }
 
-bool ERSPublisher::publish( ers::IssueChain && issue ) const {
+// bool ERSPublisher::publish( ers::IssueChain && issue ) const {
 
-  try
-    {
+//   try
+//     {
 
-      std::string binary;
-      issue.SerializeToString( & binary );
+//       std::string binary;
+//       issue.SerializeToString( & binary );
       
-      // get the topic
-      auto topic = topic(issue);
+//       // get the topic
+//       auto topic = topic(issue);
 
-      // RdKafka::Producer::RK_MSG_COPY to be investigated
-      RdKafka::ErrorCode err = m_producer->produce(topic, 
-        RdKafka::Topic::PARTITION_UA, 
-        RdKafka::Producer::RK_MSG_COPY, 
-        const_cast<char *>(binary.c_str()), binary.size(), 
-        nullptr, 0, 0, nullptr, nullptr);
-      if (err != RdKafka::ERR_NO_ERROR) { 
-        throw ProductionFailedOnTopic(ERS_HERE, topic, RdKafka::err2str(err));        
-    }
-    catch(const std::exception& e)
-    {
-      throw ProductionFailed(ERS_HERE, e.what());  
-    }
-  }
-}
+//       // RdKafka::Producer::RK_MSG_COPY to be investigated
+//       RdKafka::ErrorCode err = m_producer->produce(topic, 
+//         RdKafka::Topic::PARTITION_UA, 
+//         RdKafka::Producer::RK_MSG_COPY, 
+//         const_cast<char *>(binary.c_str()), binary.size(), 
+//         nullptr, 0, 0, nullptr, nullptr);
+//       if (err != RdKafka::ERR_NO_ERROR) { 
+//         throw ProductionFailedOnTopic(ERS_HERE, topic, RdKafka::err2str(err));        
+//     }
+//     catch(const std::exception& e)
+//     {
+//       throw ProductionFailed(ERS_HERE, e.what());  
+//     }
+//   }
+//}
 
-}

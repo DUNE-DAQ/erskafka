@@ -12,46 +12,18 @@
 #define ERSKAFKA_INCLUDE_ERSKAFKA_ERSPUBLISHER_HPP_
 
 #include "nlohmann/json.hpp"
-#include "ers/issue.pb.h"
 
 #include <librdkafka/rdkafkacpp.h>
 
 #include <memory>
 #include <string>
 
+//#include "ers/issue.pb.h"
 
-namespace dunedaq::erskafka {
-
-
-ERS_DECLAR_ISSUE(erskafka,
-                 MissingInfo,
-                 "JSON Missing " << json_entry,
-                 ((std::string)json_entry )
-
-ERS_DECLAR_ISSUE(erskafka,
-                 FailedConfig,
-                 json_entry << " failed to configure: " << message,
-                 ((std::string)json_entry)((std::string)message))
+namespace dunedaq {
 
 
-ERS_DECLAR_ISSUE(erskafka,
-                 FailingCreatingStreamer,
-                 "ERS Streamer creation failed",
-                 ERS_EMPTY)
-
-ERS_DECLAR_ISSUE(erskafka,
-                 ProductionFailed,
-                 "Failed to produced: " << error,
-                 ((std::string)message))
-
-ERS_DECLAR_ISSUE_BASE(erskafka,
-                      ProductionFailedOnTopic,
-                      "Failed to produced to topic " << topic << ": " << error,
-                      ((std::string)topic),
-                      ((std::string)message))
-
-
-
+namespace erskafka {
 
     class ERSPublisher {
 
@@ -69,14 +41,14 @@ ERS_DECLAR_ISSUE_BASE(erskafka,
 
 
         
-        bool publish( ers::IssueChain && ) const;
+      //      bool publish( dunedaq::ers::IssueChain && ) const;
         // template<class Iterator>
         // bool publish( Iterator begin, Iterator end) const;
 
         protected:
-          std::string topic( [[maybe_unsed]] const ers::IssueChain & ) const {
-            return m_default_topic;
-          }
+          //       std::string topic( [[maybe_unsed]] const ers::IssueChain & ) const {
+          //   return m_default_topic;
+          // }
 
         private:
         
@@ -85,6 +57,7 @@ ERS_DECLAR_ISSUE_BASE(erskafka,
         
 
     };
-}
+}  // erskafka namespace 
+}  // dunedaq namespace
 
 #endif  //ERSKAFKA_INCLUDE_ERSKAFKA_ERSPUBLISHER_HPP_
