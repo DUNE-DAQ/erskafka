@@ -31,13 +31,24 @@ ERS_DECLAR_ISSUE(erskafka,
 ERS_DECLAR_ISSUE(erskafka,
                  FailedConfig,
                  json_entry << " failed to configure: " << message,
-                 ((std::string)json_entry)((std::string)message)
+                 ((std::string)json_entry)((std::string)message))
 
 
 ERS_DECLAR_ISSUE(erskafka,
                  FailingCreatingStreamer,
                  "ERS Streamer creation failed",
                  ERS_EMPTY)
+
+ERS_DECLAR_ISSUE(erskafka,
+                 ProductionFailed,
+                 "Failed to produced: " << error,
+                 ((std::string)message))
+
+ERS_DECLAR_ISSUE_BASE(erskafka,
+                      ProductionFailedOnTopic,
+                      "Failed to produced to topic " << topic << ": " << error,
+                      ((std::string)topic),
+                      ((std::string)message))
 
 
 
@@ -64,7 +75,7 @@ ERS_DECLAR_ISSUE(erskafka,
 
         protected:
           std::string topic( [[maybe_unsed]] const ers::IssueChain & ) const {
-            
+            return m_default_topic;
           }
 
         private:

@@ -59,17 +59,24 @@ bool ERSPublisher::publish( ers::IssueChain && issue ) const {
   try
     {
 
-      // convert the message in binary
-
+      std::string binary;
+      issue.SerializeToString( & binary );
+      
       // get the topic
+      auto topic = topic(issue);
 
       // RdKafka::Producer::RK_MSG_COPY to be investigated
-      RdKafka::ErrorCode err = m_producer->produce(topic, RdKafka::Topic::PARTITION_UA, RdKafka::Producer::RK_MSG_COPY, const_cast<char *>(input.c_str()), input.size(), nullptr, 0, 0, nullptr, nullptr);
-      if (err != RdKafka::ERR_NO_ERROR) { std::cout << "% Failed to produce to topic " << topic << ": " << RdKafka::err2str(err) << std::endl;}
+      RdKafka::ErrorCode err = m_producer->produce(topic, 
+        RdKafka::Topic::PARTITION_UA, 
+        RdKafka::Producer::RK_MSG_COPY, 
+        const_cast<char *>(binary.c_str()), binary.size(), 
+        nullptr, 0, 0, nullptr, nullptr);
+      if (err != RdKafka::ERR_NO_ERROR) { 
+        throw ProductionFailedOnTopic(ERS_HERE, topic, RdKafka::err2str(err));        
     }
     catch(const std::exception& e)
     {
-      std::cout << "Producer error : " << e.what() << '\n';
+      throw ProductionFailed(ERS_HERE, e.what());  
     }
   }
 }
