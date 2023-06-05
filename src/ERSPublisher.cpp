@@ -8,7 +8,9 @@
 
 #include "erskafka/ERSPublisher.hpp"
 
-#include "erskafka/CommonIssues.hpp"
+#include <iostream>
+
+#include <stdexcept>
 
 using namespace dunedaq::erskafka;
 
@@ -20,12 +22,13 @@ ERSPublisher::ERSPublisher(const nlohmann::json& conf) {
 
     auto it = conf.find("bootstrap");
     if ( it == conf.end() ) {
-      throw erskafka::MissingInfo(ERS_HERE, "bootstrap");
+      std::cerr << "Missing bootstrap from json file";
+      throw std::runtime_error( "Missing bootstrap from json file" );
     }
 
     k_conf->set("bootstrap.servers", *it, errstr);
     if(errstr != ""){
-      throw erskafka::FailedConfig(ERS_HERE, "bootstrap.servers", errstr);
+      throw std::runtime_error( errstr );
     }
 
     std::string client_id;
@@ -40,14 +43,14 @@ ERSPublisher::ERSPublisher(const nlohmann::json& conf) {
     
     k_conf->set("client.id", client_id, errstr);    
     if(errstr != ""){
-      throw FailedConfig(ERS_HERE, "client.id", errstr);
+      throw std::runtime_error( errstr );
     }
 
     //Create producer instance
     m_producer.reset(RdKafka::Producer::create(k_conf, errstr));
 
     if(errstr != ""){
-      throw FailedConfig(ERS_HERE, "Producer creation", errstr);
+      throw std::runtime_error( errstr );
     }
 
     it = conf.find("default_topic");

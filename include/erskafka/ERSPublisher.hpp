@@ -18,7 +18,7 @@
 #include <memory>
 #include <string>
 
-//#include "ers/issue.pb.h"
+#include "ers/issue.pb.h"
 
 namespace dunedaq {
 
@@ -42,15 +42,15 @@ namespace erskafka {
 
         
       //      bool publish( dunedaq::ers::IssueChain && ) const;
-        // template<class Iterator>
+      // template<class Iterator>
         // bool publish( Iterator begin, Iterator end) const;
 
-        protected:
-          //       std::string topic( [[maybe_unsed]] const ers::IssueChain & ) const {
-          //   return m_default_topic;
-          // }
-
-        private:
+    protected:
+      std::string topic( /* const ::dunedaq::ers::codegen::IssueChain & */ ) const {
+	return m_default_topic;
+      }
+      
+    private:
         
         std::unique_ptr<RdKafka::Producer> m_producer;
         std::string m_default_topic = "ers_test";
