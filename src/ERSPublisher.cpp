@@ -39,8 +39,7 @@ ERSPublisher::ERSPublisher(const nlohmann::json& conf) {
         client_id = env_p;
     else
         client_id = "erskafkaproducerdefault";
-      
-    
+
     k_conf->set("client.id", client_id, errstr);    
     if(errstr != ""){
       throw std::runtime_error( errstr );
@@ -56,32 +55,39 @@ ERSPublisher::ERSPublisher(const nlohmann::json& conf) {
     it = conf.find("default_topic");
     if (it != conf.end()) m_default_topic = *it;
 
+    it = conf.find("partition");
+    if ( it != conf.end() ) m_partition = *it;
+    else if(const char* env_p = std::getenv("DUNEDAQ_PARTITION")) 
+      m_partition = env_p;
+    else {
+      throw std::runtime_error( "Unable to find parition information" );
+    }
+    
 }
 
-// bool ERSPublisher::publish( ers::IssueChain && issue ) const {
+bool ERSPublisher::publish( ers::IssueChain && issue ) const {
 
-//   try
-//     {
+  std::string binary;
+  issue.SerializeToString( & binary );
+  
+  // get the topic
+  auto topic = ERSPublisher::topic(issue);
 
-//       std::string binary;
-//       issue.SerializeToString( & binary );
-      
-//       // get the topic
-//       auto topic = topic(issue);
+  auto key = ERSPublisher::key(issue);
+  
+  //      RdKafka::Producer::RK_MSG_COPY to be investigated
+  RdKafka::ErrorCode err = m_producer->produce(topic, 
+					       RdKafka::Topic::PARTITION_UA, 
+					       RdKafka::Producer::RK_MSG_COPY, 
+					       const_cast<char *>(binary.c_str()), binary.size(), 
+					       key.c_str(),
+					       key.size(),
+					       0,
+					       nullptr);
+  if (err != RdKafka::ERR_NO_ERROR) {
+    return false;
+  }
 
-//       // RdKafka::Producer::RK_MSG_COPY to be investigated
-//       RdKafka::ErrorCode err = m_producer->produce(topic, 
-//         RdKafka::Topic::PARTITION_UA, 
-//         RdKafka::Producer::RK_MSG_COPY, 
-//         const_cast<char *>(binary.c_str()), binary.size(), 
-//         nullptr, 0, 0, nullptr, nullptr);
-//       if (err != RdKafka::ERR_NO_ERROR) { 
-//         throw ProductionFailedOnTopic(ERS_HERE, topic, RdKafka::err2str(err));        
-//     }
-//     catch(const std::exception& e)
-//     {
-//       throw ProductionFailed(ERS_HERE, e.what());  
-//     }
-//   }
-//}
+  return true;
+}
 

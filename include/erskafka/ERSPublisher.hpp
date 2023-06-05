@@ -41,20 +41,25 @@ namespace erskafka {
 
 
         
-      //      bool publish( dunedaq::ers::IssueChain && ) const;
+      bool publish( dunedaq::ers::IssueChain && ) const;
       // template<class Iterator>
         // bool publish( Iterator begin, Iterator end) const;
 
     protected:
-      std::string topic( /* const ::dunedaq::ers::codegen::IssueChain & */ ) const {
+      std::string topic( const ::dunedaq::ers::IssueChain &  ) const {
 	return m_default_topic;
       }
-      
+
+      std::string key( const ::dunedaq::ers::IssueChain &  ) const {
+	return m_partition;
+      }
+
     private:
         
-        std::unique_ptr<RdKafka::Producer> m_producer;
-        std::string m_default_topic = "ers_test";
-        
+      std::unique_ptr<RdKafka::Producer> m_producer;
+      std::string m_default_topic = "ers_test";
+      std::string m_partition ;
+      
 
     };
 }  // erskafka namespace 
