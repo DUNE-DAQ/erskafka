@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
 
-import issue_pb2
 from kafka import KafkaConsumer
 import json
 from threading import Thread
 import socket
 import os
+import re
+
+import issue_pb2
 
 class  ERSSubscriber:
     def __init__(self, config) :
         self.bootstrap = config["bootstrap"]
-        if ( 'group_id' in config.keys() ) :
+        if ( 'group_id' in config ) :
             self.group = config["group_id"]
         else:
             self.group = ""
@@ -22,29 +24,48 @@ class  ERSSubscriber:
                         
     #    print("From Kafka server:",bootstrap)
 
-    def default_id(self):  
+    def default_id(self) -> str:  
         node = socket.gethostname()
         process = os.getpid()
         thread = threading.get_ident()
         id = "{}-{}-{}".format(node, process, thread)
         return id
            
-    def add_callback(self, function, name, selection):
+    def add_callback(self, function, name, selection) -> bool:
+        if ( name in self.function ) return False
+       
+        was_running = self.running
+        if (was_running) : self.stop()
+        
+        prog = re.compile(selection)
+        self.function[name] = [prog, function]
+
+        if (was_running) : self.start()
+        return True
 
     def clear_callbacks(self):
+        if ( self.running ) :
+            self.stop()
         self.functions.clear()
 
-    def remove_callback(self, name):
+    def remove_callback(self, name) -> bool:
+        if ( name not in sef.functions.keys() ) : return False
+
+        was_running = self.running
+        if (was_running) : self.stop()
+
         self.functions.pop(name)
+
+        if ( was_running and len(self.functions)>0 ) : self.start()
+        return True
 
     def start(self):
         self.running = True
         self.thread.start()
 
-    def stop(self):
+    def stop(self) :
         self.running = False
         self.thread.join()
-
 
     def message_loop(self) :
         if (self.group == ""): group_id = self.default_id()
@@ -60,9 +81,16 @@ class  ERSSubscriber:
             try:
                 message_it = iter(consumer)
                 message = next(message_it)
+
+                for function in self.functions.values() :
+                    if ( re.match(function[0], message.key ) ) :
+                        issue = issue_pb2.IssueChain()
+                        issue.ParseFromString( message.value )
+                        function[1](issue)
                 
             except :
                 pass
+
             
             
 
