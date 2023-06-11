@@ -11,9 +11,9 @@
 #define ERSKAFKA_ERSSTREAM_HPP 
 
 #include <ers/OutputStream.hpp>
-#include <ers/ERSPublisher.hpp>
+#include "erskafka/ERSPublisher.hpp"
 
-#include <erskafka/issue.pb.h>
+#include <ers/issue.pb.h>
 
 #include <string>
 #include <vector>
@@ -38,9 +38,9 @@ namespace erskafka
         
       private:	
        //  std::string m_partition;
-       std::unique_ptr<ERSPublisher> m_publisher;
+      std::unique_ptr<dunedaq::erskafka::ERSPublisher> m_publisher;
         
-       ers::IssueChain ers_to_schema( const ers::Issue & ) const; 
+      dunedaq::ers::IssueChain ers_to_schema( const ers::Issue & ) const; 
         //void ers_to_json(const ers::Issue & issue, size_t chain, std::vector<nlohmann::json> & j_objs);
         //void kafka_exporter(std::string input, std::string topic);
 
