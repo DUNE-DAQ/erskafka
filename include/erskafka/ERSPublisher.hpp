@@ -57,7 +57,7 @@ namespace erskafka {
     private:
         
       std::unique_ptr<RdKafka::Producer> m_producer;
-      std::string m_default_topic = "ers_test";
+      std::string m_default_topic = "ers_stream";
       std::string m_partition ;
       
 

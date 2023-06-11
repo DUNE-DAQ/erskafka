@@ -21,40 +21,19 @@ ERS_REGISTER_OUTPUT_STREAM(erskafka::ERSStream, "ersstream", param)
   */
 namespace erskafka
 {   
-  erskafka::KafkaStream::ERSStream(const std::string &param)
-  {
+  erskafka::KafkaStream::ERSStream(const std::string &param) {
 
     nlohmann::json> conf;
     conf["bootstrap"] = param;
 
-
-    if(const char* env_p = std::getenv("DUNEDAQ_PARTITION")) 
-      m_partition = env_p;
-  
-    //Kafka server settings
-    std::string brokers = param;
-    std::string errstr;
-
-    RdKafka::Conf *conf = RdKafka::Conf::create(RdKafka::Conf::CONF_GLOBAL);
-    conf->set("bootstrap.servers", brokers, errstr);
-    if(errstr != ""){
-      std::cout << "Bootstrap server error : " << errstr << '\n';
-    }
-    if(const char* env_p = std::getenv("DUNEDAQ_APPLICATION_NAME")) 
-      conf->set("client.id", env_p, errstr);
-    else
-      conf->set("client.id", "erskafkaproducerdefault", errstr);
-    if(errstr != ""){
-      std::cout << "Producer configuration error : " << errstr << '\n';
-    }
-    //Create producer instance
-    m_producer = RdKafka::Producer::create(conf, errstr);
-
-    if(errstr != ""){
-      std::cout << "Producer creation error : " << errstr << '\n';
-    }
+    m_publisher.reset(make_unique<ERSPublisher>(conf));
 
   }
+
+  ers::IssueChain ERSStream::ers_to_schema( const ers::Issue & i) const {
+    
+  }
+
 
   void erskafka::ERSStream::ers_to_json(const ers::Issue &issue, size_t chain, std::vector<nlohmann::json> &j_objs)
   {
@@ -118,32 +97,10 @@ namespace erskafka
     */
   void erskafka::ERSStream::write(const ers::Issue &issue)
   {
-    try
-    {
-      std::vector<nlohmann::json> j_objs;
-      if (issue.cause() == nullptr)
-      {
-        ers_to_json(issue, 0, j_objs);
-      }
-      else
-      {
-        ers_to_json(issue, 1, j_objs);
-      }
+    try {
+      
+      m_producer -> pusblish(ers_to_schema( issue ));
 
-      // build a unique hash for a group of nested issues
-      std::ostringstream tmpstream(issue.message());
-      tmpstream << issue.context().process_id() << issue.time_t() << issue.context().application_name() << issue.context().host_name() << rand();
-      std::string tmp = tmpstream.str();
-      boost::crc_32_type crc32;
-      crc32.process_bytes(tmp.c_str(), tmp.length());
-
-      for (auto j : j_objs)
-      {
-        j["group_hash"] = crc32.checksum();
-
-        erskafka::ERSStream::kafka_exporter(j.dump(), "erskafka-reporting");
-      }
-      chained().write(issue);
     }
     catch(const std::exception& e)
     {
