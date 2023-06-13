@@ -37,7 +37,7 @@ namespace dunedaq {
       ERSPublisher(ERSPublisher && ) = delete;
       ERSPublisher & operator = (ERSPublisher && ) = delete;
       
-      ~ERSPublisher();
+      ~ERSPublisher() {;}
       
       bool publish( dunedaq::ersschema::IssueChain && ) const;
       // template<class Iterator>
