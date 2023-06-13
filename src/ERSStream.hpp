@@ -40,7 +40,7 @@ namespace erskafka
        //  std::string m_partition;
       std::unique_ptr<dunedaq::erskafka::ERSPublisher> m_publisher;
         
-      dunedaq::ers::IssueChain ers_to_schema( const ers::Issue & ) const; 
+      dunedaq::ersschema::IssueChain ers_to_schema( const ers::Issue & ) const; 
         //void ers_to_json(const ers::Issue & issue, size_t chain, std::vector<nlohmann::json> & j_objs);
         //void kafka_exporter(std::string input, std::string topic);
 

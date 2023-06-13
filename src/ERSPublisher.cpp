@@ -65,7 +65,7 @@ ERSPublisher::ERSPublisher(const nlohmann::json& conf) {
     
 }
 
-bool ERSPublisher::publish( ers::IssueChain && issue ) const {
+bool ERSPublisher::publish( ersschema::IssueChain && issue ) const {
 
   std::string binary;
   issue.SerializeToString( & binary );

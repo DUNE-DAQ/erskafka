@@ -23,34 +23,32 @@
 namespace dunedaq {
 
 
-namespace erskafka {
-
+  namespace erskafka {
+    
     class ERSPublisher {
-
-        public:
-
-        ERSPublisher(const nlohmann::json& conf);
-
-        ERSPublisher() = delete;
-        ERSPublisher(const ERSPublisher & ) = delete;
-        ERSPublisher & operator = (const ERSPublisher & ) = delete;
-        ERSPublisher(ERSPublisher && ) = delete;
-        ERSPublisher & operator = (ERSPublisher && ) = delete;
-
-        ~ERSPublisher();
-
-
-        
-      bool publish( dunedaq::ers::IssueChain && ) const;
+      
+    public:
+      
+      ERSPublisher(const nlohmann::json& conf);
+      
+      ERSPublisher() = delete;
+      ERSPublisher(const ERSPublisher & ) = delete;
+      ERSPublisher & operator = (const ERSPublisher & ) = delete;
+      ERSPublisher(ERSPublisher && ) = delete;
+      ERSPublisher & operator = (ERSPublisher && ) = delete;
+      
+      ~ERSPublisher();
+      
+      bool publish( dunedaq::ersschema::IssueChain && ) const;
       // template<class Iterator>
-        // bool publish( Iterator begin, Iterator end) const;
-
+      // bool publish( Iterator begin, Iterator end) const;
+      
     protected:
-      std::string topic( const ::dunedaq::ers::IssueChain &  ) const {
+      std::string topic( const dunedaq::ersschema::IssueChain & ) const {
 	return m_default_topic;
       }
-
-      std::string key( const ::dunedaq::ers::IssueChain &  ) const {
+      
+      std::string key( const dunedaq::ersschema::IssueChain &  ) const {
 	return m_partition;
       }
 

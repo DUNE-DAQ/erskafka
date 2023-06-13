@@ -30,7 +30,7 @@ namespace erskafka
 
   }
 
-  dunedaq::ers::IssueChain ERSStream::ers_to_schema( const ers::Issue & i) const {
+  dunedaq::ersschema::IssueChain ERSStream::ers_to_schema( const ers::Issue & i) const {
     
   }
 
