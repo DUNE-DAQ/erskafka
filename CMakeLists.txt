@@ -16,6 +16,7 @@ target_include_directories(erskafka PUBLIC)
 
 
 daq_add_application( ers_publisher_test ers_publisher_test.cxx TEST LINK_LIBRARIES erskafka )
+daq_add_application( ers_stream_test ers_stream_test.cxx TEST LINK_LIBRARIES erskafka )
 
 ##############################################################################
 
