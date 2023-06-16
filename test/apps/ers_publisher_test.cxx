@@ -7,27 +7,29 @@
 #include <thread>
 #include <sstream>
 
+#include <ers/ers.hpp>
 #include <erskafka/ERSPublisher.hpp>
 
 using namespace std;
 using namespace dunedaq::erskafka;
 
+ERS_DECLARE_ISSUE( erstest,
+		   TestIssue,
+		   "this is issue with ID: " << id,
+		   ((int)id)
+		   )
 
 int main( int argc, char * argv[] ) {
 
   nlohmann::json conf;
   conf["bootstrap"] = "monkafka.cern.ch:30092";
-  conf["partition"] = "ers_stream_test";
 
   ERSPublisher p(conf);
 
   int n = 20 ;
   for ( int i = 0 ; i < n ; ++i ) {
-    dunedaq::ersschema::IssueChain c;
-    stringstream ss;
-    ss << "Message number " << i ;
-    (*c.mutable_final()).set_message(ss.str());
-    p.publish( std::move(c) );
+    erstest::TestIssue issue(ERS_HERE, i); 
+    p.publish( issue.schema_chain() );
     this_thread::sleep_for(std::chrono::milliseconds(500));
   }
   
