@@ -21,29 +21,24 @@
 
 namespace erskafka
 {    
-    /** This stream offers capability of publishing Issues to a data stream, 
-     *  So that other services can subscribe to the stream.
-      * A stream configuration is composed of the stream name,
-      * that is "ersstream". 
-      * Messages are transported using the ERS schema defined in ers
-      * 
-      * \brief ERS stream implementation.
-      */
+  /** This stream offers capability of publishing Issues to a data stream, 
+   *  So that other services can subscribe to the stream.
+   * A stream configuration is composed of the stream name,
+   * that is "ersstream". 
+   * Messages are transported using the ERS schema defined in ers
+   * 
+   * \brief ERS stream implementation.
+   */
     
-    class ERSStream : public ers::OutputStream
-    {
-      public:
-	      explicit ERSStream( const std::string & param);
-        void write( const ers::Issue & issue ) override;
+  class ERSStream : public ers::OutputStream {
+  public:
+    explicit ERSStream( const std::string & param);
+    void write( const ers::Issue & issue ) override;
         
-      private:	
-       //  std::string m_partition;
-      std::unique_ptr<dunedaq::erskafka::ERSPublisher> m_publisher;
-        
-      //void ers_to_json(const ers::Issue & issue, size_t chain, std::vector<nlohmann::json> & j_objs);
-      //void kafka_exporter(std::string input, std::string topic);
-
-    };
+  private:	
+    std::unique_ptr<dunedaq::erskafka::ERSPublisher> m_publisher;
+    std::string m_session;
+  };
 } //namespace erskafka
 
 #endif  //ERSKAFKA_ERSSTREAM_HPP 

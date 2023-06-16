@@ -28,6 +28,12 @@ namespace erskafka
 
     m_publisher = std::make_unique<dunedaq::erskafka::ERSPublisher>(conf);
 
+    if(const char* env_p = std::getenv("DUNEDAQ_PARTITION")) 
+      m_session = env_p;
+    else {
+      throw std::runtime_error( "Unable to find parition information" );
+    }
+
   }
 
 
@@ -38,7 +44,7 @@ namespace erskafka
   {
     try {
       
-      m_publisher -> publish(ToChain( issue ));
+      m_publisher -> publish(issue.schema_chain(m_session));
 
     }
     catch(const std::exception& e)

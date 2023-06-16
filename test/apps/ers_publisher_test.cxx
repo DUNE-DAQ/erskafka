@@ -26,7 +26,7 @@ int main( int argc, char * argv[] ) {
     dunedaq::ersschema::IssueChain c;
     stringstream ss;
     ss << "Message number " << i ;
-    (*c.mutable_message()).set_message(ss.str());
+    (*c.mutable_final()).set_message(ss.str());
     p.publish( std::move(c) );
     this_thread::sleep_for(std::chrono::milliseconds(500));
   }

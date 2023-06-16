@@ -55,14 +55,6 @@ ERSPublisher::ERSPublisher(const nlohmann::json& conf) {
     it = conf.find("default_topic");
     if (it != conf.end()) m_default_topic = *it;
 
-    it = conf.find("partition");
-    if ( it != conf.end() ) m_partition = *it;
-    else if(const char* env_p = std::getenv("DUNEDAQ_PARTITION")) 
-      m_partition = env_p;
-    else {
-      throw std::runtime_error( "Unable to find parition information" );
-    }
-    
 }
 
 bool ERSPublisher::publish( ersschema::IssueChain && issue ) const {

@@ -48,16 +48,14 @@ namespace dunedaq {
 	return m_default_topic;
       }
       
-      std::string key( const dunedaq::ersschema::IssueChain &  ) const {
-	return m_partition;
+      std::string key( const dunedaq::ersschema::IssueChain & i ) const {
+	return i.final().context().session() ;
       }
 
     private:
         
       std::unique_ptr<RdKafka::Producer> m_producer;
       std::string m_default_topic = "ers_stream";
-      std::string m_partition ;
-      
 
     };
 }  // erskafka namespace 
