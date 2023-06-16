@@ -49,7 +49,7 @@ namespace dunedaq {
       }
       
       std::string key( const dunedaq::ersschema::IssueChain & i ) const {
-	return i.final().context().session() ;
+	return i.session() ;
       }
 
     private:

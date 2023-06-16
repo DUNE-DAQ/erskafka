@@ -21,19 +21,20 @@ ERS_REGISTER_OUTPUT_STREAM(erskafka::ERSStream, "ersstream", param)
   */
 namespace erskafka
 {   
-  erskafka::ERSStream::ERSStream(const std::string &param) {
+  erskafka::ERSStream::ERSStream(const std::string &param)
+    : m_session("Uknown")
+    , m_application("Uknown") {
 
     nlohmann::json conf;
     conf["bootstrap"] = param;
 
     m_publisher = std::make_unique<dunedaq::erskafka::ERSPublisher>(conf);
 
-    if(const char* env_p = std::getenv("DUNEDAQ_PARTITION")) 
+    if(auto env_p = std::getenv("DUNEDAQ_PARTITION")) 
       m_session = env_p;
-    else {
-      throw std::runtime_error( "Unable to find parition information" );
-    }
 
+    if (auto app_p = std::getenv("DUNEDAQ_APPLICATION_NAME"))
+      m_application = app_p;
   }
 
 
@@ -43,13 +44,16 @@ namespace erskafka
   void erskafka::ERSStream::write(const ers::Issue &issue)
   {
     try {
-      
-      m_publisher -> publish(issue.schema_chain(m_session));
+
+      auto schema = issue.schema_chain();
+      schema.set_session(m_session);
+      schema.set_application(m_application);
+      m_publisher -> publish(std::move(schema)) ; 
 
     }
     catch(const std::exception& e)
     {
-      std::cout << "Producer error : " << e.what() << '\n';
+      std::cerr << "Producer error : " << e.what() << '\n';
     }
   }
 } // namespace erskafka

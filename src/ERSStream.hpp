@@ -38,6 +38,7 @@ namespace erskafka
   private:	
     std::unique_ptr<dunedaq::erskafka::ERSPublisher> m_publisher;
     std::string m_session;
+    std::string m_application;
   };
 } //namespace erskafka
 
