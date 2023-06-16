@@ -28,7 +28,7 @@ int main( int argc, char * argv[] ) {
 
   int n = 20 ;
   for ( int i = 0 ; i < n ; ++i ) {
-    erstest::TestIssue issue(ERS_HERE, i); 
+    erstest::TestIssue issue(ERS_HERE, i);
     p.publish( issue.schema_chain() );
     this_thread::sleep_for(std::chrono::milliseconds(500));
   }
