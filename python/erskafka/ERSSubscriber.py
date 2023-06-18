@@ -7,7 +7,7 @@ import socket
 import os
 import re
 
-import issue_pb2
+import ers.issue_pb2 as ersissue
 
 class  ERSSubscriber:
     def __init__(self, config) :
@@ -32,7 +32,7 @@ class  ERSSubscriber:
         return id
            
     def add_callback(self, function, name, selection) -> bool:
-        if ( name in self.function ) return False
+        if ( name in self.function ) : return False
        
         was_running = self.running
         if (was_running) : self.stop()
