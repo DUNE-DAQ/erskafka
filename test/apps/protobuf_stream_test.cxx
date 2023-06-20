@@ -21,7 +21,7 @@ ERS_DECLARE_ISSUE( erskafka,
 
 int main( int argc, char * argv[] ) {
 
-  std::string conf = "ersstream(monkafka.cern.ch:30092)";
+  std::string conf = "protobufstream(monkafka.cern.ch:30092)";
 
   setenv("DUNEDAQ_PARTITION", "TestPartition",0);
   setenv("DUNEDAQ_APPLICATION_NAME", "ERSStreamTest",0);
@@ -30,9 +30,9 @@ int main( int argc, char * argv[] ) {
   
   int n = 20 ;
   for ( int i = 0 ; i < n ; ++i ) {
-    erskafka::TestIssue issue(ERS_HERE, 0);
+    erskafka::TestIssue issue(ERS_HERE, i);
     stream -> write( issue );
-    this_thread::sleep_for(std::chrono::milliseconds(500));
+    this_thread::sleep_for(std::chrono::milliseconds(500+((i%2)*1000)));
   }
     
   return 0 ;

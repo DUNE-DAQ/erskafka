@@ -11,12 +11,12 @@ find_package(RdKafka REQUIRED)
 find_package(Boost COMPONENTS iostreams REQUIRED)
 set(BOOST_LIBS Boost::iostreams ${Boost_SYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} ${Boost_LIBRARIES})
 
-daq_add_library(KafkaStream.cpp ERSStream.cpp ERSPublisher.cpp LINK_LIBRARIES ers::ers nlohmann_json::nlohmann_json RdKafka::rdkafka RdKafka::rdkafka++)
+daq_add_library(KafkaStream.cpp ProtoBufStream.cpp ERSPublisher.cpp LINK_LIBRARIES ers::ers nlohmann_json::nlohmann_json RdKafka::rdkafka RdKafka::rdkafka++)
 target_include_directories(erskafka PUBLIC)
 
 
 daq_add_application( ers_publisher_test ers_publisher_test.cxx TEST LINK_LIBRARIES erskafka )
-daq_add_application( ers_stream_test ers_stream_test.cxx TEST LINK_LIBRARIES erskafka )
+daq_add_application( protobuf_stream_test protobuf_stream_test.cxx TEST LINK_LIBRARIES erskafka )
 
 ##############################################################################
 

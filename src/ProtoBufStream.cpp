@@ -1,12 +1,12 @@
 /**
-* @file ERSStream.cpp ERSStream class implementation
+* @file ProtoBufStream.cpp ProtoBufStream class implementation
 * 
 * This is part of the DUNE DAQ software, copyright 2020.
 * Licensing/copyright details are in the COPYING file that you should have
 * received with this code.
 */
 
-#include "ERSStream.hpp"
+#include "ProtoBufStream.hpp"
 #include <ers/StreamFactory.hpp>
 #include <string>
 #include <iostream>
@@ -14,14 +14,14 @@
 #include <boost/crc.hpp>
 #include <vector>
 
-ERS_REGISTER_OUTPUT_STREAM(erskafka::ERSStream, "ersstream", param)
+ERS_REGISTER_OUTPUT_STREAM(erskafka::ProtoBufStream, "protobufstream", param)
 
 /** Constructor that creates a new instance of the ersstream stream with the given configuration.
   * \param format elastic search connection string.
   */
 namespace erskafka
 {   
-  erskafka::ERSStream::ERSStream(const std::string &param)
+  erskafka::ProtoBufStream::ProtoBufStream(const std::string &param)
     : m_session("Uknown")
     , m_application("Uknown") {
 
@@ -41,7 +41,7 @@ namespace erskafka
   /** Write method 
     * \param issue issue to be sent.
     */
-  void erskafka::ERSStream::write(const ers::Issue &issue)
+  void erskafka::ProtoBufStream::write(const ers::Issue &issue)
   {
     try {
 
