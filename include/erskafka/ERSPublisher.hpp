@@ -18,7 +18,7 @@
 #include <memory>
 #include <string>
 
-#include "ers/issue.pb.h"
+#include "ers/Schema.hpp"
 
 namespace dunedaq {
 

@@ -45,7 +45,7 @@ namespace erskafka
   {
     try {
 
-      auto schema = issue.schema_chain();
+      auto schema = to_schema_chain(issue);
       schema.set_session(m_session);
       schema.set_application(m_application);
       m_publisher -> publish(std::move(schema)) ; 

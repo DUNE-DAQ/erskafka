@@ -13,8 +13,6 @@
 #include <ers/OutputStream.hpp>
 #include "erskafka/ERSPublisher.hpp"
 
-#include <ers/issue.pb.h>
-
 #include <string>
 #include <vector>
 #include <memory>
