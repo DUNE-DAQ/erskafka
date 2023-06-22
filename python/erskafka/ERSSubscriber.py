@@ -19,7 +19,7 @@ class  ERSSubscriber:
         self.timeout = config["timeout"]
         self.running = False
         self.functions = dict()
-        self.thread = Thread(target=message_loop, args=self)
+        self.thread = Thread(target=self.message_loop)
 
                         
     #    print("From Kafka server:",bootstrap)

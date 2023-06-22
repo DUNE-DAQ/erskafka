@@ -25,7 +25,7 @@ def cli(kafka_address, kafka_port):
     conf["bootstrap"] = bootstrap
     conf["timeout"] = 400
 
-    sub = erssub(conf)
+    sub = erssub.ERSSubscriber(conf)
 
     print(conf)
 
