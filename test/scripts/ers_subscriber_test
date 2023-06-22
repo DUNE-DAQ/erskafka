@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 import erskafka.ERSSubscriber as erssub
-
+import google.protobuf.json_format as pb_json
+import json
 import click
 
 
@@ -10,19 +11,27 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 @click.command(context_settings=CONTEXT_SETTINGS)
 @click.option('--kafka-address', type=click.STRING, default="monkafka.cern.ch", help="address of the kafka broker")
-#@click.option('--kafka-port', type=click.INT, default=30092, help='port of the kafka broker')       
+@click.option('--kafka-port', type=click.INT, default=30092, help='port of the kafka broker')       
 #@click.option('--kafka-topics', multiple=True, default=['opmon'], help='topics of the kafka broker')
 #@click.option('--kafka-consumer-id', type=click.STRING, default='microservice', help='id of the kafka consumer, not really important')
 #@click.option('--kafka-consumer-group', type=click.STRING, default='kakfa-spy', help='group ID of the kafka consumer, very important to be unique or information will not be duplicated')
 #@click.option('--parse-as-json', type=click.BOOL, default=True, help='Tries to parse the messaage as a json')
 
+def cli(kafka_address, kafka_port):
 
-def cli(kafka_address) :
+    bootstrap = f"{kafka_address}:{kafka_port}"
 
-    print("Hello")
-    
+    conf = json.loads("{}")
+    conf["bootstrap"] = bootstrap
+    conf["timeout"] = 400
+
+    sub = erssub(conf)
+
+    print(conf)
 
 
+def function( issue ) :
+    print (pb_json.MessageToJson(issue))
 
 
 if __name__ == '__main__':
