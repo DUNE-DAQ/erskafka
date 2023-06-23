@@ -2,12 +2,14 @@
 
 from kafka import KafkaConsumer
 import json
-from threading import Thread
+import threading 
 import socket
 import os
 import re
+import logging
 
 import ers.issue_pb2 as ersissue
+import google.protobuf.message as msg
 
 class  ERSSubscriber:
     def __init__(self, config) :
@@ -19,7 +21,7 @@ class  ERSSubscriber:
         self.timeout = config["timeout"]
         self.running = False
         self.functions = dict()
-        self.thread = Thread(target=self.message_loop)
+        self.thread = threading.Thread(target=self.message_loop)
 
                         
     #    print("From Kafka server:",bootstrap)
@@ -32,13 +34,13 @@ class  ERSSubscriber:
         return id
            
     def add_callback(self, function, name, selection) -> bool:
-        if ( name in self.function ) : return False
+        if ( name in self.functions ) : return False
        
         was_running = self.running
         if (was_running) : self.stop()
         
-        prog = re.compile(selection)
-        self.function[name] = [prog, function]
+##        prog = re.compile(selection)
+        self.functions[name] = [selection, function]
 
         if (was_running) : self.start()
         return True
@@ -60,6 +62,7 @@ class  ERSSubscriber:
         return True
 
     def start(self):
+        print("Starting run")
         self.running = True
         self.thread.start()
 
@@ -75,23 +78,38 @@ class  ERSSubscriber:
                                  group_id=group_id, 
                                  client_id=self.default_id(),
                                  consumer_timeout_ms=self.timeout)
+        consumer.subscribe(["ers_stream"])
+
+        print("ID:", group_id, "running with functions:", *self.functions.keys())
         
         while ( self.running ) :
-            
             try:
                 message_it = iter(consumer)
                 message = next(message_it)
 
                 for function in self.functions.values() :
-                    if ( re.match(function[0], message.key ) ) :
-                        issue = issue_pb2.IssueChain()
-                        issue.ParseFromString( message.value )
-                        function[1](issue)
+                    issue = ersissue.IssueChain()
+                    issue.ParseFromString( message.value )
+                    function[1](issue)
+#                    print(key)
+#                    print( function[0].match(key))
+#                    if ( re.search(function[0], key) ) :
+#                        print(message.key, "accepted")
+#                        issue = issue_pb2.IssueChain()
+#                        issue.ParseFromString( message.value )
+ #                       function[1](issue)
+  #                  else:
+  #                      print(message.key, "discarded")
                 
-            except :
+            except msg.DecodeError :
+                print("Could not parse message")
+            except StopIteration :
                 pass
+            except :
+                print("Somehting is odd")
+
 
             
-            
+        print ("Stop")
 
         
