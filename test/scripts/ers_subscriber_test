@@ -30,10 +30,14 @@ def cli(kafka_address, kafka_port, running_seconds):
     sub = erssub.ERSSubscriber(conf)
 
     sub.add_callback(name="test",
-                     function=my_test_function,
-                     selection=".*" )
-
-    
+                     function=my_test_function )
+    sub.add_callback(name="acceptable",
+                     function=acceptable_function,
+                     selection=".*")
+    sub.add_callback(name="doomed",
+                     function=rejected_function,
+                     selection="[0-9]+")
+                     
     sub.start()
     time.sleep(running_seconds)
     sub.stop()
@@ -42,6 +46,11 @@ def cli(kafka_address, kafka_port, running_seconds):
 def my_test_function( issue ) :
     print (pb_json.MessageToJson(issue))
 
+def acceptable_function( issue ) :
+    print ("Accepted")
+
+def rejected_function( issue ) :
+    print ("Rejected")
 
 if __name__ == '__main__':
     cli(show_default=True, standalone_mode=True)
