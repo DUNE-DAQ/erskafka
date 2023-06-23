@@ -33,14 +33,14 @@ class  ERSSubscriber:
         id = "{}-{}-{}".format(node, process, thread)
         return id
            
-    def add_callback(self, function, name, selection) -> bool:
+    def add_callback(self, function, name, selection  = '.*') -> bool:
         if ( name in self.functions ) : return False
        
         was_running = self.running
         if (was_running) : self.stop()
         
-##        prog = re.compile(selection)
-        self.functions[name] = [selection, function]
+        prog = re.compile(selection)
+        self.functions[name] = [prog, function]
 
         if (was_running) : self.start()
         return True
@@ -81,35 +81,29 @@ class  ERSSubscriber:
         consumer.subscribe(["ers_stream"])
 
         print("ID:", group_id, "running with functions:", *self.functions.keys())
-        
+
         while ( self.running ) :
             try:
                 message_it = iter(consumer)
                 message = next(message_it)
-
+                timestamp = message.timestamp
+                key = message.key.decode('ascii')
+                ## The key from the message is binary
+                ## In order to correctly match an ascii regex, we have to convert
+                
                 for function in self.functions.values() :
-                    issue = ersissue.IssueChain()
-                    issue.ParseFromString( message.value )
-                    function[1](issue)
-#                    print(key)
-#                    print( function[0].match(key))
-#                    if ( re.search(function[0], key) ) :
-#                        print(message.key, "accepted")
-#                        issue = issue_pb2.IssueChain()
-#                        issue.ParseFromString( message.value )
- #                       function[1](issue)
-  #                  else:
-  #                      print(message.key, "discarded")
+                    if function[0].match(key) :
+                        issue = ersissue.IssueChain()
+                        issue.ParseFromString( message.value )
+                        function[1](issue)
                 
             except msg.DecodeError :
                 print("Could not parse message")
             except StopIteration :
                 pass
             except :
-                print("Somehting is odd")
+                print("Somehting is wrong, exception was raised")
 
-
-            
         print ("Stop")
 
         
