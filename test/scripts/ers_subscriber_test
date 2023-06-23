@@ -14,10 +14,6 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 @click.option('--kafka-address', type=click.STRING, default="monkafka.cern.ch", help="address of the kafka broker")
 @click.option('--kafka-port', type=click.INT, default=30092, help='port of the kafka broker')
 @click.option('--running-seconds', type=click.INT, default=15, help='Number of seconds of the run')
-#@click.option('--kafka-topics', multiple=True, default=['opmon'], help='topics of the kafka broker')
-#@click.option('--kafka-consumer-id', type=click.STRING, default='microservice', help='id of the kafka consumer, not really important')
-#@click.option('--kafka-consumer-group', type=click.STRING, default='kakfa-spy', help='group ID of the kafka consumer, very important to be unique or information will not be duplicated')
-#@click.option('--parse-as-json', type=click.BOOL, default=True, help='Tries to parse the messaage as a json')
 
 def cli(kafka_address, kafka_port, running_seconds):
 
