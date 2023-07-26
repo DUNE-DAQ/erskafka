@@ -6,6 +6,7 @@
 #include <chrono>
 #include <thread>
 #include <sstream>
+#include <memory>
 
 #include <ers/OutputStream.hpp>
 #include <ers/StreamManager.hpp>
@@ -34,6 +35,13 @@ int main( int argc, char * argv[] ) {
     stream -> write( issue );
     this_thread::sleep_for(std::chrono::milliseconds(500+((i%2)*1000)));
   }
-    
+
+  erskafka::TestIssue first( ERS_HERE, 100);
+  erskafka::TestIssue second( ERS_HERE, 200, first);
+  erskafka::TestIssue third( ERS_HERE, 300, second);
+  
+  stream -> write( std::move(third) );
+  this_thread::sleep_for(std::chrono::milliseconds(500));
+  
   return 0 ;
 }
