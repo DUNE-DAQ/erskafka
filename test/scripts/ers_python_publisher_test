@@ -1,0 +1,30 @@
+from dunedaq.ersschema import IssueChain, SimpleIssue, Context
+from time import sleep
+from ERSPublisher import ERSPublisher # Assuming ERSPublisher class is in ERSPublisher.py
+
+# Define a function to create a TestIssue
+def create_test_issue(i):
+    context = Context() # Fill with any required context data
+    issue = SimpleIssue(context=context, name="TestIssue", message=f"this is issue with ID: {i}")
+    issue_chain = IssueChain(final=issue)
+    issue_chain.session = str(i) # Set session for this test
+    return issue_chain
+
+def main():
+    # configuration for Kafka
+    conf = {
+        'bootstrap': 'monkafka.cern.ch:30092'
+    }
+
+    # Create the ERSPublisher
+    publisher = ERSPublisher(conf)
+
+    n = 20
+    for i in range(n):
+        issue = create_test_issue(i)
+        result = publisher.publish(issue)
+        print(f"Publishing issue {i}: {'successful' if result else 'failed'}")
+        sleep(0.5)
+
+if __name__ == "__main__":
+    main()
