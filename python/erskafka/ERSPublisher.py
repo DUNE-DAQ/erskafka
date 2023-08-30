@@ -3,7 +3,7 @@
  # This is part of the DUNE DAQ Software Suite, copyright 2023.
  # Licensing/copyright details are in the COPYING file that you should have
  # received with this code.
- #
+ # 
 from kafka import KafkaConsumer
 import json
 import threading 
@@ -14,35 +14,44 @@ import logging
 import ers.issue_pb2 as ersissue
 import google.protobuf.message as msg
 
+from kafka import KafkaProducer
+
 class ERSPublisher:
-    def __init__(self, conf):
-        k_conf = {
-            'bootstrap.servers': conf.get('bootstrap'),
-            'client.id': conf.get('cliend_id', os.getenv('DUNEDAQ_APPLICATION_NAME', 'erskafkaproducerdefault'))
-        }
+    def __init__(self, config):
+        """Initialize the ERSPublisher with given Kafka configurations.
 
-        if k_conf['bootstrap.servers'] is None:
-            raise RuntimeError('Missing bootstrap from json file')
+        Args:
+            config (dict): Configuration for Kafka producer. 
+                           Should contain 'bootstrap' for the Kafka bootstrap server.
+        """
+        self.bootstrap = config['bootstrap']
 
-        self.producer = Producer(k_conf)
-        self.default_topic = conf.get('default_topic', 'ers_stream')
+        # Initialize Kafka producer
+        self.producer = KafkaProducer(
+            bootstrap_servers=self.bootstrap,
+            value_serializer=lambda v: v.SerializeToString(),
+            key_serializer=lambda k: str(k).encode('utf-8')
+        )
 
-    def publish(self, issue: IssueChain):
-        binary = ersissue.SerializeToString()
+    def publish(self, issue, topic="ers_stream"):
+        """Publish an ERS issue to the Kafka topic.
 
-        # Get the topic and key
-        topic = self.topic(issue)
-        key = self.key(issue)
+        Args:
+            issue (ers.issue_pb2.IssueChain): The issue to be published.
+            topic (str, optional): Kafka topic to publish to. Defaults to "ers_stream".
 
-        err = self.producer.produce(topic, binary, key)
+        Returns:
+            FutureRecordMetadata: Result from Kafka producer send method.
+        """
+        binary = issue.SerializeToString()
+        return self.producer.send(topic, key=issue.session, value=binary)
 
-        if err is not None:
-            return False
+    def close(self, timeout=None):
+        """Close the Kafka producer.
 
-        return True
+        Args:
+            timeout (float, optional): The time to block during the close operation.
+        """
+        self.producer.close(timeout=timeout)
 
-    def topic(self, issue: ersissue.IssueChain):
-        return self.default_topic
 
-    def key(self, issue: ersissue.IssueChain):
-        return issue.session # Accessing the session field directly
