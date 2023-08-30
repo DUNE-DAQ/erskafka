@@ -1,14 +1,18 @@
-#
  # @file ERSPublisher.py ERSPublusher Class Implementation
  #  
  # This is part of the DUNE DAQ Software Suite, copyright 2023.
  # Licensing/copyright details are in the COPYING file that you should have
  # received with this code.
  #
-
-from confluent_kafka import Producer
+from kafka import KafkaConsumer
+import json
+import threading 
+import socket
 import os
-from dunedaq.ersschema import IssueChain # Assuming the correct import path
+import re
+import logging
+import ers.issue_pb2 as ersissue
+import google.protobuf.message as msg
 
 class ERSPublisher:
     def __init__(self, conf):
@@ -24,7 +28,7 @@ class ERSPublisher:
         self.default_topic = conf.get('default_topic', 'ers_stream')
 
     def publish(self, issue: IssueChain):
-        binary = issue.SerializeToString()
+        binary = ersissue.SerializeToString()
 
         # Get the topic and key
         topic = self.topic(issue)
@@ -37,8 +41,8 @@ class ERSPublisher:
 
         return True
 
-    def topic(self, issue: IssueChain):
+    def topic(self, issue: ersissue.IssueChain):
         return self.default_topic
 
-    def key(self, issue: IssueChain):
+    def key(self, issue: ersissue.IssueChain):
         return issue.session # Accessing the session field directly
