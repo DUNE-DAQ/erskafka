@@ -1,32 +1,70 @@
 #!/usr/bin/env python3
-#from dunedaq.ersschema import IssueChain, SimpleIssue, Context
-import ers.issue_pb2 as ersissue
-from time import sleep
+import sys
+
+# I want it to point to sourcecode and not install
+desired_path = "/nfs/home/svergani/dev_area_2023_08_04/sourcecode/erskafka/python"
+sys.path.insert(0, desired_path)
+#!/usr/bin/env python3
+
 import erskafka.ERSPublisher as erspub
+import ers.issue_pb2 as ersissue
+import json
+from time import sleep
+import click
+import socket
 
-# Define a function to create a TestIssue
-def create_test_issue(i):
-    context = Context() # Fill with any required context data
-    issue = SimpleIssue(context=context, name="TestIssue", message=f"this is issue with ID: {i}")
-    issue_chain = IssueChain(final=issue)
-    issue_chain.session = str(i) # Set session for this test
-    return issue_chain
 
-def main():
-    # configuration for Kafka
-    conf = {
-        'bootstrap': 'monkafka.cern.ch:30092'
-    }
+CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
-    # Create the ERSPublisher
-    publisher = ERSPublisher(conf)
+@click.command(context_settings=CONTEXT_SETTINGS)
+@click.option('--kafka-address', type=click.STRING, default="monkafka.cern.ch", help="address of the kafka broker")
+@click.option('--kafka-port', type=click.INT, default=30092, help='port of the kafka broker')
+@click.option('--number-of-issues', type=click.INT, default=20, help='Number of issues to send')
 
-    n = 20
-    for i in range(n):
+def cli(kafka_address, kafka_port, number_of_issues):
+
+    bootstrap = f"{kafka_address}:{kafka_port}"
+
+    conf = json.loads("{}")
+    conf["bootstrap"] = bootstrap
+
+    publisher = erspub.ERSPublisher(conf)
+
+    for i in range(number_of_issues):
         issue = create_test_issue(i)
         result = publisher.publish(issue)
         print(f"Publishing issue {i}: {'successful' if result else 'failed'}")
         sleep(0.5)
 
-if __name__ == "__main__":
-    main()
+def create_test_issue(i):
+    # Create the context
+    context = ersissue.Context(
+        cwd="path_to_current_working_dir",
+        file_name=__file__,
+        function_name="create_test_issue",
+        host_name=socket.gethostname(),
+        line_number=39, # or dynamically get the line number
+        package_name="erskafka",
+        # ... fill other fields as needed
+    )
+
+    # Create the simple issue
+    issue = ersissue.SimpleIssue(
+        context=context,
+        name="TestIssue",
+        message=f"this is issue with ID: {i}"
+    )
+
+    # Create the issue chain
+    issue_chain = ersissue.IssueChain(
+        final=issue,
+        session=str(i)  # Set session for this test as you did before
+        # ... fill other fields as needed
+    )
+    
+    return issue_chain
+
+
+if __name__ == '__main__':
+    cli()
+
