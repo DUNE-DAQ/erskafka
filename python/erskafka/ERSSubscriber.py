@@ -101,8 +101,8 @@ class  ERSSubscriber:
                 print("Could not parse message")
             except StopIteration :
                 pass
-            except :
-                print("Somehting is wrong, exception was raised")
+            except Exception as e:
+                print(e)
 
         print ("Stop")
 
