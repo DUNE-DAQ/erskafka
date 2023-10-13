@@ -1,57 +1,52 @@
- # @file ERSPublisher.py ERSPublusher Class Implementation
- #  
- # This is part of the DUNE DAQ Software Suite, copyright 2023.
- # Licensing/copyright details are in the COPYING file that you should have
- # received with this code.
- # 
-from kafka import KafkaConsumer
-import json
-import threading 
-import socket
-import os
-import re
-import logging
-import ers.issue_pb2 as ersissue
-import google.protobuf.message as msg
+# @file ERSPublisher.py ERSPublisher Class Implementation
+#
+# This is part of the DUNE DAQ Software Suite, copyright 2023.
+# Licensing/copyright details are in the COPYING file that you should have
+# received with this code.
+#
 
 from kafka import KafkaProducer
+import ers.issue_pb2 as ersissue
 
 class ERSPublisher:
     def __init__(self, config):
         """Initialize the ERSPublisher with given Kafka configurations.
-
+        
         Args:
             config (dict): Configuration for Kafka producer. 
                            Should contain 'bootstrap' for the Kafka bootstrap server.
+                           Optionally contains 'topic' for the default topic to publish to.
         """
         self.bootstrap = config['bootstrap']
+        self.topic = config.get('topic', 'ers_stream')
+        self.producer = None
 
-        # Initialize Kafka producer
+    def __enter__(self):
+        """Context manager entry method. Initializes the Kafka producer."""
         self.producer = KafkaProducer(
             bootstrap_servers=self.bootstrap,
             value_serializer=lambda v: v.SerializeToString(),
             key_serializer=lambda k: str(k).encode('utf-8')
         )
+        return self
 
-    def publish(self, issue, topic="ers_stream"):
+    def __exit__(self, exc_type, exc_value, traceback):
+        """Context manager exit method. Closes the Kafka producer."""
+        if self.producer:
+            self.producer.close()
+
+    def publish(self, issue):
         """Publish an ERS issue to the Kafka topic.
-
+        
         Args:
             issue (ers.issue_pb2.IssueChain): The issue to be published.
-            topic (str, optional): Kafka topic to publish to. Defaults to "ers_stream".
-
+        
         Returns:
             FutureRecordMetadata: Result from Kafka producer send method.
         """
-        binary = issue.SerializeToString()
-        return self.producer.send(topic, key=issue.session, value=binary)
+        return self.producer.send(self.topic, key=issue.session, value=issue)
 
-    def close(self, timeout=None):
-        """Close the Kafka producer.
-
-        Args:
-            timeout (float, optional): The time to block during the close operation.
-        """
-        self.producer.close(timeout=timeout)
-
+# Usage example:
+# with ERSPublisher(config) as publisher:
+#     publisher.publish(issue)
 
