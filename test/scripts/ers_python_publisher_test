@@ -1,4 +1,7 @@
+#!/usr/bin/env python3
 import sys
+import inspect
+import os
 
 import erskafka.ERSPublisher as erspub
 import ers.issue_pb2 as ersissue
@@ -7,20 +10,18 @@ from time import sleep
 import click
 import socket
 
-
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 @click.command(context_settings=CONTEXT_SETTINGS)
-@click.option('--kafka-address', type=click.STRING, default="monkafka.cern.ch", help="address of the kafka broker")
-@click.option('--kafka-port', type=click.INT, default=30092, help='port of the kafka broker')
-@click.option('--number-of-issues', type=click.INT, default=20, help='Number of issues to send')
+@click.option('--kafka-address', type=click.STRING, default="monkafka.cern.ch", help="Address of the Kafka broker.")
+@click.option('--kafka-port', type=click.INT, default=30092, help='Port of the Kafka broker.')
+@click.option('--number-of-issues', type=click.INT, default=20, help='Number of issues to send.')
 
 def cli(kafka_address, kafka_port, number_of_issues):
 
     bootstrap = f"{kafka_address}:{kafka_port}"
 
-    conf = json.loads("{}")
-    conf["bootstrap"] = bootstrap
+    conf = {"bootstrap": bootstrap}
 
     publisher = erspub.ERSPublisher(conf)
 
@@ -33,31 +34,28 @@ def cli(kafka_address, kafka_port, number_of_issues):
 def create_test_issue(i):
     # Create the context
     context = ersissue.Context(
-        cwd="path_to_current_working_dir",
+        cwd=os.getcwd(),
         file_name=__file__,
-        function_name="create_test_issue",
+        function_name=inspect.currentframe().f_code.co_name,
         host_name=socket.gethostname(),
-        line_number=39, # or dynamically get the line number
+        line_number=inspect.currentframe().f_lineno,
         package_name="erskafka",
-        # ... fill other fields as needed
     )
 
     # Create the simple issue
     issue = ersissue.SimpleIssue(
         context=context,
         name="TestIssue",
-        message=f"this is issue with ID: {i}"
+        message=f"This is issue with ID: {i}"
     )
 
     # Create the issue chain
     issue_chain = ersissue.IssueChain(
         final=issue,
-        session=str(i)  # Set session for this test as you did before
-        # ... fill other fields as needed
+        session=str(i)
     )
     
     return issue_chain
-
 
 if __name__ == '__main__':
     cli()
