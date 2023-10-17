@@ -1,10 +1,3 @@
-# @file ERSPublisher.py ERSPublisher Class Implementation
-#
-# This is part of the DUNE DAQ Software Suite, copyright 2023.
-# Licensing/copyright details are in the COPYING file that you should have
-# received with this code.
-#
-
 from kafka import KafkaProducer
 import ers.issue_pb2 as ersissue
 
@@ -19,19 +12,19 @@ class ERSPublisher:
         """
         self.bootstrap = config['bootstrap']
         self.topic = config.get('topic', 'ers_stream')
-        self.producer = None
-
-    def __enter__(self):
-        """Context manager entry method. Initializes the Kafka producer."""
         self.producer = KafkaProducer(
             bootstrap_servers=self.bootstrap,
             value_serializer=lambda v: v.SerializeToString(),
             key_serializer=lambda k: str(k).encode('utf-8')
         )
-        return self
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        """Context manager exit method. Closes the Kafka producer."""
+#del method is not determinist and not best practise, but it is the best option to clean the memory 
+#without having the user to call the close method
+    def __del__(self):
+        """Destructor-like method to clean up resources."""
+        self.close()
+#the close method can be called by the user if they want to, but it will be dealt by del anyway
+    def close(self):
+        """Explicit method to close the Kafka producer."""
         if self.producer:
             self.producer.close()
 
@@ -47,6 +40,8 @@ class ERSPublisher:
         return self.producer.send(self.topic, key=issue.session, value=issue)
 
 # Usage example:
-# with ERSPublisher(config) as publisher:
-#     publisher.publish(issue)
+# publisher = ERSPublisher(config)
+# publisher.publish(issue)
+# No need to manually close, but you can if desired:
+# publisher.close()
 
