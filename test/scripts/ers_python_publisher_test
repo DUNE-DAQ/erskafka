@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import erskafka.ERSPublisher as erspub
 from erskafka.ERSPublisher import ERSException  # import the custom exception
 from time import sleep
