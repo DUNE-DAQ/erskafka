@@ -5,6 +5,16 @@ import ers.issue_pb2 as ersissue
 from datetime import datetime
 from kafka import KafkaProducer
 
+from enum import Enum
+
+class SeverityLevel(Enum):
+    INFO = "INFO"
+    WARNING = "WARNING"
+    ERROR = "ERROR"
+    CRITICAL = "CRITICAL"
+    DEBUG = "DEBUG"
+
+
 class ERSPublisher:
 
     def __init__(self, config):
@@ -25,10 +35,15 @@ class ERSPublisher:
             function_name=inspect.currentframe().f_back.f_code.co_name,  # getting the caller function name
             host_name=socket.gethostname(),
             line_number=inspect.currentframe().f_back.f_lineno,  # getting the caller's line number
-            package_name="python-environment"
+            package_name="unknown",
+            process_id=os.getpid(),
+            thread_id=threading.get_ident(),
+            user_id=os.getuid(),
+            user_name=os.getlogin(),
+            application_name="python"
         )
 
-    def create_issue(self, message, name="DefaultIssueName", severity=None):
+    def create_issue(self, message, name=None, severity=SeverityLevel.INFO.value):
         """Create an ERS issue with minimal user input."""
         current_time = datetime.now().timestamp()
         context = self._generate_context()
@@ -42,8 +57,8 @@ class ERSPublisher:
             issue.severity = severity
         return issue
 
-    def publish_simple_message(self, message):
-        issue = self.create_issue(message)
+    def publish_simple_message(self, message, name="GenericPythonIssue"):
+        issue = self.create_issue(message, name=name)
         issue_chain = ersissue.IssueChain(
             final=issue,
             session=str(issue.time)  # using time as a session identifier
