@@ -25,7 +25,7 @@ class ERSPublisher:
             function_name=inspect.currentframe().f_back.f_code.co_name,  # getting the caller function name
             host_name=socket.gethostname(),
             line_number=inspect.currentframe().f_back.f_lineno,  # getting the caller's line number
-            package_name="erskafka"
+            package_name="python-environment"
         )
 
     def create_issue(self, message, name="DefaultIssueName", severity=None):
