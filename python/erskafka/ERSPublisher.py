@@ -14,6 +14,50 @@ class SeverityLevel(Enum):
     CRITICAL = "CRITICAL"
     DEBUG = "DEBUG"
 
+def generate_context():
+    """Generate the context for an issue."""
+    return ersissue.Context(
+        cwd=os.getcwd(),
+        file_name=__file__,
+        function_name=inspect.currentframe().f_back.f_code.co_name,  # getting the caller function name
+        host_name=socket.gethostname(),
+        line_number=inspect.currentframe().f_back.f_lineno,  # getting the caller's line number
+        package_name="unknown",
+        application_name="python"
+    )
+
+def exception_to_issue(exc: Exception) -> ersissue.SimpleIssue:
+    """Converts an exception to a SimpleIssue."""
+    context = generate_context()
+    return ersissue.SimpleIssue(
+        context=context,
+        name=type(exc).__name__,
+        message=str(exc),
+        time=datetime.now().timestamp(),
+        severity=SeverityLevel.ERROR.value,
+        inheritance=["python_issue", type(exc).__name__]
+    )
+
+def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO.value, exc=None):
+    """Create an ERS issue with minimal user input."""
+    current_time = datetime.now().timestamp()
+    context = generate_context()
+    issue = ersissue.SimpleIssue(
+        context=context,
+        name=name,
+        message=message,
+        time=current_time,
+        severity=severity
+    )
+
+    # Setting the inheritance based on whether the issue comes from an exception or not
+    if exc:
+        issue.inheritance.extend(["python_issue", type(exc).__name__])
+    else:
+        issue.inheritance.extend(["python_issue", name])
+
+    return issue
+
 
 class ERSPublisher:
 
@@ -27,56 +71,25 @@ class ERSPublisher:
             key_serializer=lambda k: str(k).encode('utf-8')
         )
 
-    def _generate_context(self):
-        """Private method to generate the context for an issue."""
-        return ersissue.Context(
-            cwd=os.getcwd(),
-            file_name=__file__,
-            function_name=inspect.currentframe().f_back.f_code.co_name,  # getting the caller function name
-            host_name=socket.gethostname(),
-            line_number=inspect.currentframe().f_back.f_lineno,  # getting the caller's line number
-            package_name="unknown",
-            process_id=os.getpid(),
-            thread_id=threading.get_ident(),
-            user_id=os.getuid(),
-            user_name=os.getlogin(),
-            application_name="python"
-        )
-
-    def create_issue(self, message, name=None, severity=SeverityLevel.INFO.value):
-        """Create an ERS issue with minimal user input."""
-        current_time = datetime.now().timestamp()
-        context = self._generate_context()
-        issue = ersissue.SimpleIssue(
-            context=context,
-            name=name,
-            message=message,
-            time=current_time
-        )
-        if severity:
-            issue.severity = severity
-        return issue
-
-    def publish_simple_message(self, message, name="GenericPythonIssue"):
-        issue = self.create_issue(message, name=name)
-        issue_chain = ersissue.IssueChain(
-            final=issue,
-            session=str(issue.time)  # using time as a session identifier
-        )
-        return self.publish(issue_chain)
+    def publish_simple_message(self, message):
+    issue = create_issue(message, name="GenericPythonIssue")
+    issue_chain = ersissue.IssueChain(
+        final=issue,
+        session=os.getenv('DUNEDAQ_PARTITION', 'Unknown'),
+        application="python",
+        module=__name__  # this sets the module to the name of the current module,it can be adjusted as necessary
+    )
+    return self.publish(issue_chain)
 
     def publish(self, issue):
         """Publish an ERS issue to the Kafka topic."""
         return self.producer.send(self.topic, key=issue.session, value=issue)
-#this can be called by the user (it is best practise), but it is dealt by del if not
-    def close(self):
-        """Explicit method to close the Kafka producer."""
-        if self.producer:
-            self.producer.close()
-#del is not determinist and not best practise, but if the user does not call close, it will close and clean up resources
+
+
     def __del__(self):
         """Destructor-like method to clean up resources."""
-        self.close()
+        if self.producer:
+            self.producer.close()
 
 class ERSException(Exception):
     """Custom exception which can also be treated as an ERS issue."""
