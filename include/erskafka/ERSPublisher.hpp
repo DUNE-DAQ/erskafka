@@ -45,7 +45,8 @@ namespace dunedaq {
       
     protected:
       std::string topic( const dunedaq::ersschema::IssueChain & ) const {
-	return m_default_topic;
+        constexpr std::string ret("monitoring.");
+        return ret+m_default_topic;
       }
       
       std::string key( const dunedaq::ersschema::IssueChain & i ) const {
