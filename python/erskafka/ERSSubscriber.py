@@ -80,7 +80,9 @@ class  ERSSubscriber:
                                  group_id=group_id, 
                                  client_id=self.default_id(),
                                  consumer_timeout_ms=self.timeout)
-        consumer.subscribe(["monitoring.ers_stream"])#changed because of new monitoring name. Previously was ers_stream
+        
+        topics = ["ers_stream"]
+        consumer.subscribe(["monitoring." + s for s in topics])
 
         print("ID:", group_id, "running with functions:", *self.functions.keys())
 
