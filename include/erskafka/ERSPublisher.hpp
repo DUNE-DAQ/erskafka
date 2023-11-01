@@ -45,8 +45,7 @@ namespace dunedaq {
       
     protected:
       std::string topic( const dunedaq::ersschema::IssueChain & ) const {
-        constexpr std::string ret("monitoring.");
-        return ret+m_default_topic;
+        return m_default_topic;
       }
       
       std::string key( const dunedaq::ersschema::IssueChain & i ) const {
@@ -56,7 +55,7 @@ namespace dunedaq {
     private:
         
       std::unique_ptr<RdKafka::Producer> m_producer;
-      std::string m_default_topic = "ers_stream";
+      std::string m_default_topic = "monitoring.ers_stream";
 
     };
 }  // erskafka namespace 
