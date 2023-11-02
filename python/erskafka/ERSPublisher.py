@@ -78,7 +78,8 @@ class ERSPublisher:
     def __init__(self, config):
         """Initialize the ERSPublisher with given Kafka configurations."""
         self.bootstrap = config['bootstrap']
-        self.topic = config.get('topic', 'ers_stream')
+        base_topic = config.get('topic', 'ers_stream')
+        self.topic = f"monitoring_{base_topic}" if not base_topic.startswith('monitoring_') else base_topic
         self.producer = KafkaProducer(
             bootstrap_servers=self.bootstrap,
             value_serializer=lambda v: v.SerializeToString(),
