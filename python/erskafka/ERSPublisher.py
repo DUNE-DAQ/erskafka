@@ -40,7 +40,7 @@ def exception_to_issue(exc: Exception) -> ersissue.SimpleIssue:
 
 def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO.value, exc=None):
     """Create an ERS IssueChain with minimal user input."""
-    current_time = datetime.now().timestamp()
+    current_time = round(datetime.now().timestamp())
     context = generate_context()
     issue = ersissue.SimpleIssue(
         context=context,
