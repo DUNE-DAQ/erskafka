@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import erskafka.ERSPublisher as erspub
-from erskafka.ERSPublisher import ERSException  # import the custom exception
+from erskafka.ERSPublisher import ERSException, SeverityLevel  # import the custom exception and the SeverityLevel enum
 from time import sleep
 import click
 
@@ -18,6 +18,7 @@ def cli(kafka_address, kafka_port, number_of_issues):
 
     for i in range(number_of_issues):
         message = f"This is issue with ID: {i}"
+        # Note that we don't need to specify severity or exc for normal messages
         result = publisher.publish_simple_message(message)
         print(f"Publishing issue {i}: {'successful' if result else 'failed'}")
         sleep(0.5)
@@ -27,7 +28,8 @@ def cli(kafka_address, kafka_port, number_of_issues):
         raise ERSException("This is a custom ERS exception for testing!")
     except ERSException as e:
         print(f"Caught an ERSException: {e}")
-        result = publisher.publish_simple_message(str(e))
+        # Now we pass the exception to publish_simple_message
+        result = publisher.publish_simple_message(str(e), severity=SeverityLevel.ERROR.value, exc=e)
         print(f"Publishing exception message: {'successful' if result else 'failed'}")
 
 if __name__ == '__main__':
