@@ -13,7 +13,7 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 def cli(kafka_address, kafka_port, number_of_issues):
     bootstrap = f"{kafka_address}:{kafka_port}"
-    conf = {"bootstrap": bootstrap}
+    conf = {"bootstrap": bootstrap, "topic": "monitoring_ers_stream"}
     publisher = erspub.ERSPublisher(conf)
 
     for i in range(number_of_issues):
