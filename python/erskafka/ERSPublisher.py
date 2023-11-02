@@ -87,8 +87,8 @@ class ERSPublisher:
         )
 
     def publish_simple_message(self, message, severity=SeverityLevel.INFO.value, exc=None):
-    issue_chain = create_issue(message, severity=severity, exc=exc)
-    return self.publish(issue_chain)
+        issue_chain = create_issue(message, severity=severity, exc=exc)
+        return self.publish(issue_chain)
 
 
     def publish(self, issue):
