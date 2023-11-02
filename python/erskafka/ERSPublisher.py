@@ -39,7 +39,7 @@ def exception_to_issue(exc: Exception) -> ersissue.SimpleIssue:
     )
 
 def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO.value, exc=None):
-    """Create an ERS issue with minimal user input."""
+    """Create an ERS IssueChain with minimal user input."""
     current_time = datetime.now().timestamp()
     context = generate_context()
     issue = ersissue.SimpleIssue(
@@ -56,7 +56,21 @@ def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO
     else:
         issue.inheritance.extend(["python_issue", name])
 
-    return issue
+    # Create the IssueChain here
+    issue_chain = ersissue.IssueChain(
+        final=issue,
+        session=os.getenv('DUNEDAQ_PARTITION', 'Unknown'),
+        application="python",
+        module=__name__  # this sets the module to the name of the current module
+    )
+    
+    # Add the exception as the cause if it exists
+    if exc:
+        issue_chain.cause.CopyFrom(exception_to_issue(exc))
+        
+    return issue_chain
+
+
 
 
 class ERSPublisher:
@@ -71,15 +85,10 @@ class ERSPublisher:
             key_serializer=lambda k: str(k).encode('utf-8')
         )
 
-    def publish_simple_message(self, message):
-    issue = create_issue(message, name="GenericPythonIssue")
-    issue_chain = ersissue.IssueChain(
-        final=issue,
-        session=os.getenv('DUNEDAQ_PARTITION', 'Unknown'),
-        application="python",
-        module=__name__  # this sets the module to the name of the current module,it can be adjusted as necessary
-    )
+    def publish_simple_message(self, message, severity=SeverityLevel.INFO.value, exc=None):
+    issue_chain = create_issue(message, severity=severity, exc=exc)
     return self.publish(issue_chain)
+
 
     def publish(self, issue):
         """Publish an ERS issue to the Kafka topic."""
