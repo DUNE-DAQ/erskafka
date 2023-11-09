@@ -29,11 +29,12 @@ def generate_context():
 def exception_to_issue(exc: Exception) -> ersissue.SimpleIssue:
     """Converts an exception to a SimpleIssue."""
     context = generate_context()
+    current_time = int(datetime.now().timestamp())
     return ersissue.SimpleIssue(
         context=context,
         name=type(exc).__name__,
         message=str(exc),
-        time=datetime.now().timestamp(),
+        time=current_time,
         severity=SeverityLevel.ERROR.value,
         inheritance=["python_issue", type(exc).__name__]
     )
@@ -64,9 +65,11 @@ def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO
         module=__name__  # this sets the module to the name of the current module
     )
     
-    # Add the exception as the cause if it exists
+    # Add the exception as a cause if it exists
     if exc:
-        issue_chain.cause.CopyFrom(exception_to_issue(exc))
+        cause_issue = exception_to_issue(exc)
+        issue_chain.causes.append(cause_issue)  # Append the exception issue to the causes field
+
         
     return issue_chain
 
