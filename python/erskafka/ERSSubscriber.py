@@ -60,11 +60,13 @@ class  ERSSubscriber:
 
         if ( was_running and len(self.functions)>0 ) : self.start()
         return True
-
+    #TOPIC="ers_stream" #debug
     def start(self):
         print("Starting run")
         self.running = True
         self.thread.start()
+       # consumer.subscribe([TOPIC])#debug
+       # print(f"Subscribed to topic: {TOPIC}")#debug
 
     def stop(self) :
         self.running = False
@@ -78,7 +80,7 @@ class  ERSSubscriber:
                                  group_id=group_id, 
                                  client_id=self.default_id(),
                                  consumer_timeout_ms=self.timeout)
-        consumer.subscribe(["ers_stream"])
+        consumer.subscribe(["monitoring.ers_stream"])#changed because of new monitoring name. Previously was ers_stream
 
         print("ID:", group_id, "running with functions:", *self.functions.keys())
 

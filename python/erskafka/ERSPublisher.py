@@ -74,17 +74,27 @@ def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO
 
 
 class ERSPublisher:
-
     def __init__(self, config):
-        """Initialize the ERSPublisher with given Kafka configurations."""
+        # Initialize self.topic to ensure it's always set
+        self.topic = None  # Default value in case the following setup fails
+
+        # Proceed with the rest of the setup
         self.bootstrap = config['bootstrap']
-        base_topic = config.get('topic', 'ers_stream')
-        self.topic = f"monitoring_{base_topic}" if not base_topic.startswith('monitoring_') else base_topic
+        base_topic = config.get('topic', 'ers_stream')  # Default to 'ers_stream'
+
+        # The following code ensures that 'monitoring.' is prefixed if it's missing
+        # Adjust this block according to the correct logic for your use case
+        if 'monitoring.' not in base_topic:
+            base_topic = 'monitoring.' + base_topic
+
+        self.topic = base_topic  # Set the topic attribute correctly
+
+        # The rest of the KafkaProducer initialization...
         self.producer = KafkaProducer(
             bootstrap_servers=self.bootstrap,
             value_serializer=lambda v: v.SerializeToString(),
             key_serializer=lambda k: str(k).encode('utf-8')
-        )
+            )
 
     def publish_simple_message(self, message, severity=SeverityLevel.INFO.value, exc=None):
         issue_chain = create_issue(message, severity=severity, exc=exc)
@@ -95,6 +105,8 @@ class ERSPublisher:
         """Publish an ERS issue to the Kafka topic."""
         return self.producer.send(self.topic, key=issue.session, value=issue)
 
+        #print(f"Sent message : {result}")#debug
+        #return result#debug
 
     def __del__(self):
         """Destructor-like method to clean up resources."""
