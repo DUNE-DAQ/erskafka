@@ -16,19 +16,29 @@ class SeverityLevel(Enum):
 
 def generate_context():
     """Generate the context for an issue."""
-    # Start with the current frame and then move up two frames to get the caller's caller
+    # Walk back up the stack and find the frame for the original caller
     frame = inspect.currentframe()
-    caller_frame = frame.f_back.f_back if frame.f_back and frame.f_back.f_back else frame
+    while hasattr(frame, "f_code"):
+        co = frame.f_code
+        filename = os.path.normcase(co.co_filename)
+        if 'ERSPublisher.py' not in filename:
+            # Found the frame of the original caller
+            break
+        frame = frame.f_back
+    
+    # If no such frame is found, default to the current frame
+    if frame is None:
+        frame = inspect.currentframe()
+
     return ersissue.Context(
         cwd=os.getcwd(),
-        file_name=__file__,
-        function_name=caller_frame.f_code.co_name,  # getting the caller's caller function name
+        file_name=frame.f_code.co_filename,
+        function_name=frame.f_code.co_name,
         host_name=socket.gethostname(),
-        line_number=caller_frame.f_lineno,  # getting the caller's caller line number
+        line_number=frame.f_lineno,
         package_name="unknown",
         application_name="python"
     )
-
 
 def exception_to_issue(exc: Exception) -> ersissue.SimpleIssue:
     """Converts an exception to a SimpleIssue."""
