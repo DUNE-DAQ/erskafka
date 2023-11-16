@@ -56,7 +56,23 @@ def exception_to_issue(exc: Exception) -> ersissue.SimpleIssue:
 def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO.value, exc=None):
     """Create an ERS IssueChain with minimal user input."""
     current_time = round(datetime.now().timestamp())
-    context = generate_context()
+    
+    # Walk back up the stack and find the frame for the original caller
+    frame = inspect.currentframe()
+    while hasattr(frame, "f_code"):
+        co = frame.f_code
+        filename = os.path.normcase(co.co_filename)
+        if 'ERSPublisher.py' not in filename:
+            # Found the frame of the original caller
+            module_name = inspect.getmodule(frame).__name__
+            break
+        frame = frame.f_back
+    
+    # If no such frame is found, default to the current module
+    if frame is None:
+        module_name = __name__
+
+    context = generate_context()  # generate_context function remains the same
     issue = ersissue.SimpleIssue(
         context=context,
         name=name,
@@ -76,7 +92,7 @@ def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO
         final=issue,
         session=os.getenv('DUNEDAQ_PARTITION', 'Unknown'),
         application="python",
-        module=__name__  # this sets the module to the name of the current module
+        module=module_name  # this sets the module to the name of the current module
     )
     
     # Add the exception as a cause if it exists
