@@ -28,6 +28,18 @@ def cli(kafka_address, kafka_port, number_of_issues):
         print(f"Publishing issue {i}: {'successful' if result else 'failed'}")
         sleep(0.5)
 
+    # Directly create and publish issues using create_issue
+    for i in range(number_of_issues):
+        message = f"Direct test of create_issue with ID: {i}"
+        print(f"Creating issue {i}: {message}")
+        # Directly create the issue
+        issue_chain = erspub.create_issue(message, name="DirectCreateIssueTest", severity=SeverityLevel.INFO.value)
+        # Publish the issue using the publish method
+        print(f"Publishing issue {i} created by create_issue")
+        result = publisher.publish(issue_chain)
+        print(f"Publish result for issue {i}: {result.get(timeout=10)}")
+        sleep(0.5)
+
     # Exception Test
     try:
         raise ERSException("This is a custom ERS exception for testing!")
