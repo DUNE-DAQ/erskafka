@@ -16,15 +16,19 @@ class SeverityLevel(Enum):
 
 def generate_context():
     """Generate the context for an issue."""
+    # Start with the current frame and then move up two frames to get the caller's caller
+    frame = inspect.currentframe()
+    caller_frame = frame.f_back.f_back if frame.f_back and frame.f_back.f_back else frame
     return ersissue.Context(
         cwd=os.getcwd(),
         file_name=__file__,
-        function_name=inspect.currentframe().f_back.f_code.co_name,  # getting the caller function name
+        function_name=caller_frame.f_code.co_name,  # getting the caller's caller function name
         host_name=socket.gethostname(),
-        line_number=inspect.currentframe().f_back.f_lineno,  # getting the caller's line number
+        line_number=caller_frame.f_lineno,  # getting the caller's caller line number
         package_name="unknown",
         application_name="python"
     )
+
 
 def exception_to_issue(exc: Exception) -> ersissue.SimpleIssue:
     """Converts an exception to a SimpleIssue."""
