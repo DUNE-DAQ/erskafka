@@ -73,19 +73,21 @@ def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO
         module_name = __name__
 
     context = generate_context()  # generate_context function remains the same
+    # If the issue is created from an exception, adjust the name and inheritance accordingly
+    if exc:
+        name = type(exc).__name__  # Override the name with the exception's type name
+        inheritance_list = ["python_issue", "python_issue_from_exception", name]
+    else:
+        inheritance_list = ["python_issue", name]
+
     issue = ersissue.SimpleIssue(
         context=context,
         name=name,
         message=message,
         time=current_time,
-        severity=severity
+        severity=severity,
+        inheritance=inheritance_list
     )
-
-    # Setting the inheritance based on whether the issue comes from an exception or not
-    if exc:
-        issue.inheritance.extend(["python_issue", type(exc).__name__])
-    else:
-        issue.inheritance.extend(["python_issue", name])
 
     # Create the IssueChain here
     issue_chain = ersissue.IssueChain(
