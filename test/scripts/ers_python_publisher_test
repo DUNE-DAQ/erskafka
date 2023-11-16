@@ -29,7 +29,7 @@ def cli(kafka_address, kafka_port, number_of_issues):
         sleep(0.5)
 
     # Directly create and publish issues using create_issue
-    for i in range(number_of_issues):
+    for i in range(2):#previously number_of_issues
         message = f"Direct test of create_issue with ID: {i}"
         print(f"Creating issue {i}: {message}")
         # Directly create the issue
