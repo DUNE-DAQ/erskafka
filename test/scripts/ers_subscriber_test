@@ -27,6 +27,8 @@ def cli(kafka_address, kafka_port, running_seconds):
 
     sub.add_callback(name="test",
                      function=my_test_function )
+    sub.add_callback(name="throwing",
+                     function=throwing_function )
     sub.add_callback(name="acceptable",
                      function=acceptable_function,
                      selection=".*")
@@ -48,5 +50,8 @@ def acceptable_function( issue ) :
 def rejected_function( issue ) :
     print ("Rejected")
 
+def throwing_function( issue ) :
+    print( issue.non_existent_entry )
+        
 if __name__ == '__main__':
     cli(show_default=True, standalone_mode=True)
