@@ -17,7 +17,7 @@ def cli(kafka_address, kafka_port, number_of_issues):
     publisher = erspub.ERSPublisher(conf)
 
     # Test 1: publish_simple_message without exception
-    for i in range(2):#number_of_issues
+    for i in range(number_of_issues):
         message = f"Simple message with ID: {i}"
         print(f"Publishing simple message {i}: {message}")
         result = publisher.publish_simple_message(message)
@@ -33,7 +33,7 @@ def cli(kafka_address, kafka_port, number_of_issues):
         print(f"Publishing exception message: {'successful' if result else 'failed'}")
 
     # Test 3: create_issue without exception
-    for i in range(2):#number_of_issues
+    for i in range(number_of_issues):
         message = f"Direct create_issue test with ID: {i}"
         print(f"Creating issue {i}: {message}")
         issue_chain = erspub.create_issue(message, name="DirectCreateIssueTest", severity=SeverityLevel.INFO.value)
