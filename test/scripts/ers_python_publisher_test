@@ -11,43 +11,45 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 @click.option('--kafka-port', type=click.INT, default=30092, help='Port of the Kafka broker.')
 @click.option('--number-of-issues', type=click.INT, default=20, help='Number of issues to send.')
 
-
-
 def cli(kafka_address, kafka_port, number_of_issues):
     bootstrap = f"{kafka_address}:{kafka_port}"
     conf = {"bootstrap": bootstrap, "topic": "monitoring.ers_stream"}
     publisher = erspub.ERSPublisher(conf)
 
-    for i in range(number_of_issues):
-        message = f"This is issue with ID: {i}"
-        # Note that we don't need to specify severity or exc for normal messages
-        print(f"Publishing issue {i}: {message}")#debug
+    # Test 1: publish_simple_message without exception
+    for i in range(2):#number_of_issues
+        message = f"Simple message with ID: {i}"
+        print(f"Publishing simple message {i}: {message}")
         result = publisher.publish_simple_message(message)
-        print(f"Publish result for issue {i}: {result.get(timeout=10)}")#debug
-
-        print(f"Publishing issue {i}: {'successful' if result else 'failed'}")
+        print(f"Publish result for simple message {i}: {'successful' if result else 'failed'}")
         sleep(0.5)
 
-    # Directly create and publish issues using create_issue
-    for i in range(2):#previously number_of_issues
-        message = f"Direct test of create_issue with ID: {i}"
-        print(f"Creating issue {i}: {message}")
-        # Directly create the issue
-        issue_chain = erspub.create_issue(message, name="DirectCreateIssueTest", severity=SeverityLevel.INFO.value)
-        # Publish the issue using the publish method
-        print(f"Publishing issue {i} created by create_issue")
-        result = publisher.publish(issue_chain)
-        print(f"Publish result for issue {i}: {result.get(timeout=10)}")
-        sleep(0.5)
-
-    # Exception Test
+    # Test 2: publish_simple_message with exception
     try:
-        raise ERSException("This is a custom ERS exception for testing!")
+        raise ERSException("Custom ERS exception for testing publish_simple_message!")
     except ERSException as e:
         print(f"Caught an ERSException: {e}")
-        # Now we pass the exception to publish_simple_message
         result = publisher.publish_simple_message(str(e), severity=SeverityLevel.ERROR.value, exc=e)
         print(f"Publishing exception message: {'successful' if result else 'failed'}")
+
+    # Test 3: create_issue without exception
+    for i in range(2):#number_of_issues
+        message = f"Direct create_issue test with ID: {i}"
+        print(f"Creating issue {i}: {message}")
+        issue_chain = erspub.create_issue(message, name="DirectCreateIssueTest", severity=SeverityLevel.INFO.value)
+        print(f"Publishing issue {i} created by create_issue")
+        result = publisher.publish(issue_chain)
+        print(f"Publish result for issue {i}: {'successful' if result else 'failed'}")
+        sleep(0.5)
+
+    # Test 4: create_issue with exception
+    try:
+        raise ERSException("Custom ERS exception for testing create_issue!")
+    except ERSException as e:
+        print(f"Caught an ERSException: {e}")
+        issue_chain = erspub.create_issue(str(e), exc=e)
+        result = publisher.publish(issue_chain)
+        print(f"Publishing issue from create_issue with exception: {'successful' if result else 'failed'}")
 
 if __name__ == '__main__':
     cli()
