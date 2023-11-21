@@ -9,7 +9,7 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 @click.command(context_settings=CONTEXT_SETTINGS)
 @click.option('--kafka-address', type=click.STRING, default="monkafka.cern.ch", help="Address of the Kafka broker.")
 @click.option('--kafka-port', type=click.INT, default=30092, help='Port of the Kafka broker.')
-@click.option('--number-of-issues', type=click.INT, default=12, help='Number of issues to send.')
+@click.option('--number-of-issues', type=click.INT, default=10, help='Number of issues to send.')
 
 def cli(kafka_address, kafka_port, number_of_issues):
     bootstrap = f"{kafka_address}:{kafka_port}"
