@@ -49,8 +49,8 @@ def exception_to_issue(exc: Exception) -> ersissue.SimpleIssue:
         name=type(exc).__name__,
         message=str(exc),
         time=current_time,
-        severity=SeverityLevel.ERROR.value,
-        inheritance=["python_issue", type(exc).__name__]
+        severity=SeverityLevel.WARNING.value,
+        inheritance=["PythonIssue", type(exc).__name__]
     )
 
 def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO.value, exc=None):
@@ -78,11 +78,11 @@ def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO
     if exc:
         # If the issue is created from an exception, set the name and inheritance
         name = type(exc).__name__  # Use the exception's type name
-        inheritance_list = ["python_issue", "python_issue_from_exception", name]
+        inheritance_list = ["PythonIssue", "PythonIssueFromException", name]
         issue = exception_to_issue(exc)  # Use the existing function to create an issue from the exception
     else:
         # For non-exception issues, continue as normal
-        inheritance_list = ["python_issue", name]
+        inheritance_list = ["PythonIssue", name]
         issue = ersissue.SimpleIssue(
             context=context,
             name=name,
