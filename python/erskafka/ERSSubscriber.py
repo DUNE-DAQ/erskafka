@@ -28,9 +28,10 @@ class  ERSSubscriber:
 
     def default_id(self) -> str:  
         node = socket.gethostname()
+        user = os.getlogin()
         process = os.getpid()
         thread = threading.get_ident()
-        id = "{}-{}-{}".format(node, process, thread)
+        id = "{}-{}-{}-{}".format(node, user, process, thread)
         return id
            
     def add_callback(self, function, name, selection  = '.*') -> bool:
