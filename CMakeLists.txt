@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.12)
-project(erskafka VERSION 1.5.2)
+project(erskafka VERSION 1.5.3)
 
 find_package(daq-cmake REQUIRED)
 
