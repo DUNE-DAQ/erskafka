@@ -55,26 +55,14 @@ def exception_to_issue(exc: Exception) -> ersissue.SimpleIssue:
     )
 
 
-def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO.value, exc=None):
+def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO.value, cause=None):
     """Create an ERS IssueChain with minimal user input."""
     current_time = time.time_ns()  # Get current time in nanoseconds
-    
-    # Walk back up the stack and find the frame for the original caller
-    frame = inspect.currentframe()
-    while hasattr(frame, "f_code"):
-        co = frame.f_code
-        filename = os.path.normcase(co.co_filename)
-        if 'ERSPublisher.py' not in filename:
-            # Found the frame of the original caller
-            module_name = inspect.getmodule(frame).__name__
-            break
-        frame = frame.f_back
-    
-    # If no such frame is found, default to the current module
-    if frame is None:
-        module_name = __name__
-
     context = generate_context()
+
+    # Define module_name based on the caller's module
+    frame = inspect.currentframe().f_back  # Get the frame of the caller
+    module_name = inspect.getmodule(frame).__name__ if frame else __name__
 
     issue = ersissue.SimpleIssue(
         context=context,
@@ -84,24 +72,24 @@ def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO
         severity=severity
     )
 
-    if exc:
-        # If the issue is created from an exception, set the name and append to inheritance
-        issue.severity = SeverityLevel.WARNING.value
-        issue.name = type(exc).__name__
-        issue.inheritance.extend(["PythonIssue", "PythonIssueFromException", type(exc).__name__])
-    else:
-        # For non-exception issues, just append the name
-        issue.inheritance.append(name)
+    if cause:
+        if isinstance(cause, Exception):
+            # Convert exception to a SimpleIssue
+            cause_issue = exception_to_issue(cause)
+            issue.inheritance.append(cause_issue.name)
+        elif isinstance(cause, (ersissue.SimpleIssue, ersissue.IssueChain)):
+            # Append the cause's name directly
+            issue.inheritance.append(cause.name)
 
-    # Create the IssueChain here without adding the exception as a separate cause
     issue_chain = ersissue.IssueChain(
         final=issue,
         session=os.getenv('DUNEDAQ_PARTITION', 'Unknown'),
         application="python",
         module=module_name
     )
-    
+
     return issue_chain
+
 
 
 class ERSPublisher:
@@ -114,7 +102,7 @@ class ERSPublisher:
         base_topic = config.get('topic', 'ers_stream')  # Default to 'ers_stream'
 
         # The following code ensures that 'monitoring.' is prefixed if it's missing
-        # Adjust this block according to the correct logic for your use case
+        # Adjust this block according to the correct logic
         if 'monitoring.' not in base_topic:
             base_topic = 'monitoring.' + base_topic
 
@@ -127,17 +115,14 @@ class ERSPublisher:
             key_serializer=lambda k: str(k).encode('utf-8')
             )
 
-    def publish_simple_message(self, message, severity=SeverityLevel.INFO.value, exc=None):
-        issue_chain = create_issue(message, severity=severity, exc=exc)
+    def publish_simple_message(self, message, severity=SeverityLevel.INFO.value, cause=None):
+        issue_chain = create_issue(message, severity=severity, cause=cause)
         return self.publish(issue_chain)
 
 
     def publish(self, issue):
         """Publish an ERS issue to the Kafka topic."""
         return self.producer.send(self.topic, key=issue.session, value=issue)
-
-        #print(f"Sent message : {result}")#debug
-        #return result#debug
 
     def __del__(self):
         """Destructor-like method to clean up resources."""
