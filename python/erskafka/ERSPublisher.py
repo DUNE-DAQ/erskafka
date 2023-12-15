@@ -4,6 +4,7 @@ import inspect
 import ers.issue_pb2 as ersissue
 from datetime import datetime
 from kafka import KafkaProducer
+import time
 
 from enum import Enum
 
@@ -43,20 +44,20 @@ def generate_context():
 def exception_to_issue(exc: Exception) -> ersissue.SimpleIssue:
     """Converts an exception to a SimpleIssue."""
     context = generate_context()
-    current_time = int(datetime.now().timestamp())
+    current_time = time.time_ns()  # Get current time in nanoseconds
     # Create the SimpleIssue with context and time only.
     # The name and inheritance will be set in the create_issue function.
     return ersissue.SimpleIssue(
         context=context,
         message=str(exc),
         time=current_time,
-        severity=SeverityLevel.WARNING.value  # Assuming exceptions are always considered ERROR level
+        severity=SeverityLevel.WARNING.value  # Assuming exceptions are always considered WARNING level
     )
 
 
 def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO.value, exc=None):
     """Create an ERS IssueChain with minimal user input."""
-    current_time = round(datetime.now().timestamp())
+    current_time = time.time_ns()  # Get current time in nanoseconds
     
     # Walk back up the stack and find the frame for the original caller
     frame = inspect.currentframe()
@@ -85,6 +86,7 @@ def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO
 
     if exc:
         # If the issue is created from an exception, set the name and append to inheritance
+        issue.severity = SeverityLevel.WARNING.value
         issue.name = type(exc).__name__
         issue.inheritance.extend(["PythonIssue", "PythonIssueFromException", type(exc).__name__])
     else:
