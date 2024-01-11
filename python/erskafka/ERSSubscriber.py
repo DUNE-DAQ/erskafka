@@ -60,13 +60,10 @@ class  ERSSubscriber:
 
         if ( was_running and len(self.functions)>0 ) : self.start()
         return True
-    #TOPIC="ers_stream" #debug
     def start(self):
         print("Starting run")
         self.running = True
         self.thread.start()
-       # consumer.subscribe([TOPIC])#debug
-       # print(f"Subscribed to topic: {TOPIC}")#debug
 
     def stop(self) :
         self.running = False

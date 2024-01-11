@@ -54,6 +54,7 @@ def exception_to_issue(exc: Exception) -> ersissue.SimpleIssue:
         severity=SeverityLevel.WARNING.value  # Assuming exceptions are always considered WARNING level
     )
 
+<<<<<<< HEAD
 def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO.value, cause=None):
     """Create an ERS IssueChain with minimal user input."""
     current_time = time.time_ns()
@@ -69,6 +70,18 @@ def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO
         time=current_time,
         severity=severity
     )
+<<<<<<< HEAD
+=======
+
+    if cause:
+        if isinstance(cause, Exception):
+            # Convert exception to a SimpleIssue
+            cause_issue = exception_to_issue(cause)
+            issue.inheritance.append(cause_issue.name)
+        elif isinstance(cause, (ersissue.SimpleIssue, ersissue.IssueChain)):
+            # Append the cause's name directly
+            issue.inheritance.append(cause.name)
+>>>>>>> origin/svergani/erspublisher
 
     issue_chain = ersissue.IssueChain(
         final=issue,
@@ -77,6 +90,7 @@ def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO
         module=module_name
     )
 
+<<<<<<< HEAD
     if cause:
         if isinstance(cause, Exception):
             # Convert exception to a SimpleIssue and append to causes of issue_chain
@@ -90,6 +104,8 @@ def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO
             issue_chain.causes.extend(cause.causes)
             issue_chain.causes.append(cause.final)
 
+=======
+>>>>>>> origin/svergani/erspublisher
     return issue_chain
 
 
