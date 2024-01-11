@@ -54,7 +54,6 @@ def exception_to_issue(exc: Exception) -> ersissue.SimpleIssue:
         severity=SeverityLevel.WARNING.value  # Assuming exceptions are always considered WARNING level
     )
 
-<<<<<<< HEAD
 def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO.value, cause=None):
     """Create an ERS IssueChain with minimal user input."""
     current_time = time.time_ns()
@@ -70,8 +69,6 @@ def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO
         time=current_time,
         severity=severity
     )
-<<<<<<< HEAD
-=======
 
     if cause:
         if isinstance(cause, Exception):
