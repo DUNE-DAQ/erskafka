@@ -54,14 +54,12 @@ def exception_to_issue(exc: Exception) -> ersissue.SimpleIssue:
         severity=SeverityLevel.WARNING.value  # Assuming exceptions are always considered WARNING level
     )
 
-
 def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO.value, cause=None):
     """Create an ERS IssueChain with minimal user input."""
-    current_time = time.time_ns()  # Get current time in nanoseconds
+    current_time = time.time_ns()
     context = generate_context()
 
-    # Define module_name based on the caller's module
-    frame = inspect.currentframe().f_back  # Get the frame of the caller
+    frame = inspect.currentframe().f_back
     module_name = inspect.getmodule(frame).__name__ if frame else __name__
 
     issue = ersissue.SimpleIssue(
@@ -72,21 +70,25 @@ def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO
         severity=severity
     )
 
-    if cause:
-        if isinstance(cause, Exception):
-            # Convert exception to a SimpleIssue
-            cause_issue = exception_to_issue(cause)
-            issue.inheritance.append(cause_issue.name)
-        elif isinstance(cause, (ersissue.SimpleIssue, ersissue.IssueChain)):
-            # Append the cause's name directly
-            issue.inheritance.append(cause.name)
-
     issue_chain = ersissue.IssueChain(
         final=issue,
         session=os.getenv('DUNEDAQ_PARTITION', 'Unknown'),
         application="python",
         module=module_name
     )
+
+    if cause:
+        if isinstance(cause, Exception):
+            # Convert exception to a SimpleIssue and append to causes of issue_chain
+            cause_issue = exception_to_issue(cause)
+            issue_chain.causes.extend([cause_issue])
+        elif isinstance(cause, ersissue.SimpleIssue):
+            # Add the cause directly to the causes of issue_chain
+            issue_chain.causes.extend([cause])
+        elif isinstance(cause, ersissue.IssueChain):
+            # Set the final cause of the existing chain as the first cause of the new chain
+            issue_chain.causes.extend(cause.causes)
+            issue_chain.causes.append(cause.final)
 
     return issue_chain
 
