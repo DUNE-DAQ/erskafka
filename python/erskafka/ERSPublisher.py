@@ -88,8 +88,8 @@ def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO
             issue_chain.causes.extend([cause])
         elif isinstance(cause, ersissue.IssueChain):
             # Set the final cause of the existing chain as the first cause of the new chain
-            issue_chain.causes.extend(cause.causes)
             issue_chain.causes.append(cause.final)
+            issue_chain.causes.extend(cause.causes)
 
     return issue_chain
 
