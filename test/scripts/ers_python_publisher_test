@@ -10,10 +10,11 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 @click.option('--kafka-address', type=click.STRING, default="monkafka.cern.ch", help="Address of the Kafka broker.")
 @click.option('--kafka-port', type=click.INT, default=30092, help='Port of the Kafka broker.')
 @click.option('--number-of-issues', type=click.INT, default=10, help='Number of issues to send.')
+@click.option('--kafka-topic', type=click.STRING, default="ers_stream", help="Name of the Kafka topic.")
 
-def cli(kafka_address, kafka_port, number_of_issues):
+def cli(kafka_address, kafka_port, number_of_issues, kafka_topic):
     bootstrap = f"{kafka_address}:{kafka_port}"
-    conf = {"bootstrap": bootstrap, "topic": "monitoring.ers_stream"}
+    conf = {"bootstrap": bootstrap, "topic": kafka_topic}
     publisher = erspub.ERSPublisher(conf)
 
     # Test 1: publish_simple_message without exception
