@@ -70,6 +70,7 @@ def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO
         severity=severity
     )
 
+    # No need to explicitly initialize 'inheritance'; it's already an empty list by default
 
     issue_chain = ersissue.IssueChain(
         final=issue,
@@ -78,6 +79,7 @@ def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO
         module=module_name
     )
 
+    # Process the cause and add to issue_chain.causes, but not to issue.inheritance
     if cause:
         if isinstance(cause, Exception):
             # Convert exception to a SimpleIssue and append to causes of issue_chain
@@ -92,7 +94,6 @@ def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO
             issue_chain.causes.extend(cause.causes)
 
     return issue_chain
-
 
 
 class ERSPublisher:
