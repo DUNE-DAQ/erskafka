@@ -3,6 +3,7 @@ import erskafka.ERSPublisher as erspub
 from erskafka.ERSPublisher import ERSException, SeverityLevel  # import the custom exception and the SeverityLevel enum
 from time import sleep
 import click
+import os
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
@@ -13,7 +14,8 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 @click.option('--kafka-topic', type=click.STRING, default="ers_stream", help="Name of the Kafka topic.")
 @click.option('--session', type=click.STRING, default="session_tester", help="Name of the session")
 
-def cli(kafka_address, kafka_port, number_of_issues, kafka_topic):
+def cli(kafka_address, kafka_port, number_of_issues, kafka_topic, session):
+    os.environ['DUNEDAQ_PARTITION']=session
     bootstrap = f"{kafka_address}:{kafka_port}"
     conf = {"bootstrap": bootstrap, "topic": kafka_topic}
     publisher = erspub.ERSPublisher(conf)
