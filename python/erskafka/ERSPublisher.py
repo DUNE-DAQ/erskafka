@@ -52,6 +52,7 @@ def exception_to_issue(exc: Exception) -> ersissue.SimpleIssue:
         message=str(exc),
         time=current_time,
         severity=SeverityLevel.WARNING.value  # Assuming exceptions are always considered WARNING level
+        inheritance=["PythonIssue", type(exc).__name__]
     )
 
 def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO.value, cause=None):
@@ -68,6 +69,7 @@ def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO
         message=message,
         time=current_time,
         severity=severity
+        inheritance=inheritance_list
     )
 
     # No need to explicitly initialize 'inheritance'; it's already an empty list by default
@@ -85,13 +87,16 @@ def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO
             # Convert exception to a SimpleIssue and append to causes of issue_chain
             cause_issue = exception_to_issue(cause)
             issue_chain.causes.extend([cause_issue])
+            inheritance_list = ["PythonIssue", "IssueFromException", name]
         elif isinstance(cause, ersissue.SimpleIssue):
             # Add the cause directly to the causes of issue_chain
             issue_chain.causes.extend([cause])
+            inheritance_list = ["PythonIssue", name]
         elif isinstance(cause, ersissue.IssueChain):
             # Set the final cause of the existing chain as the first cause of the new chain
             issue_chain.causes.append(cause.final)
             issue_chain.causes.extend(cause.causes)
+            inheritance_list = ["PythonIssue", name]
 
     return issue_chain
 
