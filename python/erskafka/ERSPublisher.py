@@ -56,7 +56,7 @@ def exception_to_issue(exc: Exception) -> ersissue.SimpleIssue:
         inheritance=["PythonIssue", type(exc).__name__]
     )
 
-def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO.value, cause=None,exc=None):
+def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO.value, cause=None,exc=None,session="Unknown"):
     """Create an ERS IssueChain with minimal user input."""
     current_time = time.time_ns()
     context = generate_context()
@@ -86,7 +86,7 @@ def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO
 
     issue_chain = ersissue.IssueChain(
         final=issue,
-        session=os.getenv('DUNEDAQ_PARTITION', 'Unknown'),
+        session=session,
         application="python",
         module=module_name
     )
@@ -110,6 +110,7 @@ def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO
 
 class ERSPublisher:
     def __init__(self, config):
+        self.session = config.get("session", "Unknown")
         # Initialize self.topic to ensure it's always set
         self.topic = None  # Default value in case the following setup fails
 
@@ -132,7 +133,7 @@ class ERSPublisher:
             )
 
     def publish_simple_message(self, message, severity=SeverityLevel.INFO.value, cause=None):
-        issue_chain = create_issue(message, severity=severity, cause=cause)
+        issue_chain = create_issue(message, severity=severity, cause=cause, session=self.session)
         return self.publish(issue_chain)
 
 

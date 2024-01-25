@@ -13,9 +13,9 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 @click.option('--kafka-topic', type=click.STRING, default="ers_stream", help="Name of the Kafka topic.")
 @click.option('--session', type=click.STRING, default="session_tester", help="Name of the session")
 
-def cli(kafka_address, kafka_port, number_of_issues, kafka_topic):
+def cli(kafka_address, kafka_port, number_of_issues, kafka_topic, session):
     bootstrap = f"{kafka_address}:{kafka_port}"
-    conf = {"bootstrap": bootstrap, "topic": kafka_topic}
+    conf = {"bootstrap": bootstrap, "topic": kafka_topic, "session":session}
     publisher = erspub.ERSPublisher(conf)
 
     # Test 1: publish_simple_message without exception
