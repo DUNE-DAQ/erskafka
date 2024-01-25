@@ -7,6 +7,7 @@ import socket
 import os
 import re
 import logging
+import getpass
 
 import ers.issue_pb2 as ersissue
 import google.protobuf.message as msg
@@ -28,9 +29,10 @@ class  ERSSubscriber:
 
     def default_id(self) -> str:  
         node = socket.gethostname()
+        user = getpass.getuser()
         process = os.getpid()
         thread = threading.get_ident()
-        id = "{}-{}-{}".format(node, process, thread)
+        id = "{}-{}-{}-{}".format(node, user, process, thread)
         return id
            
     def add_callback(self, function, name, selection  = '.*') -> bool:
