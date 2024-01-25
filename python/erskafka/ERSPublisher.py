@@ -49,9 +49,10 @@ def exception_to_issue(exc: Exception) -> ersissue.SimpleIssue:
     # The name and inheritance will be set in the create_issue function.
     return ersissue.SimpleIssue(
         context=context,
+        name=type(exc).__name__,
         message=str(exc),
         time=current_time,
-        severity=SeverityLevel.WARNING.value  # Assuming exceptions are always considered WARNING level
+        severity=SeverityLevel.WARNING.value,  # Assuming exceptions are always considered WARNING level
         inheritance=["PythonIssue", type(exc).__name__]
     )
 
@@ -63,12 +64,21 @@ def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO
     frame = inspect.currentframe().f_back
     module_name = inspect.getmodule(frame).__name__ if frame else __name__
 
+    if Exception:
+        # If the issue is created from an exception, set the name and inheritance
+        name = type(Exception).__name__  # Use the exception's type name
+        inheritance_list = ["PythonIssue", "IssueFromException", name]
+        issue = exception_to_issue(Exception)  # Use the existing function to create an issue from the exception
+    else:
+        # For non-exception issues, continue as normal
+        inheritance_list = ["PythonIssue", name]
+
     issue = ersissue.SimpleIssue(
         context=context,
         name=name,
         message=message,
         time=current_time,
-        severity=severity
+        severity=severity,
         inheritance=inheritance_list
     )
 
@@ -87,16 +97,13 @@ def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO
             # Convert exception to a SimpleIssue and append to causes of issue_chain
             cause_issue = exception_to_issue(cause)
             issue_chain.causes.extend([cause_issue])
-            inheritance_list = ["PythonIssue", "IssueFromException", name]
         elif isinstance(cause, ersissue.SimpleIssue):
             # Add the cause directly to the causes of issue_chain
             issue_chain.causes.extend([cause])
-            inheritance_list = ["PythonIssue", name]
         elif isinstance(cause, ersissue.IssueChain):
             # Set the final cause of the existing chain as the first cause of the new chain
             issue_chain.causes.append(cause.final)
             issue_chain.causes.extend(cause.causes)
-            inheritance_list = ["PythonIssue", name]
 
     return issue_chain
 
