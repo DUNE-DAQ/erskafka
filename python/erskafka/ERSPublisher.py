@@ -56,7 +56,7 @@ def exception_to_issue(exc: Exception) -> ersissue.SimpleIssue:
         inheritance=["PythonIssue", type(exc).__name__]
     )
 
-def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO.value, cause=None):
+def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO.value, cause=None,exc=None):
     """Create an ERS IssueChain with minimal user input."""
     current_time = time.time_ns()
     context = generate_context()
@@ -64,11 +64,11 @@ def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO
     frame = inspect.currentframe().f_back
     module_name = inspect.getmodule(frame).__name__ if frame else __name__
 
-    if Exception:
+    if exc:
         # If the issue is created from an exception, set the name and inheritance
-        name = type(Exception).__name__  # Use the exception's type name
+        name = type(exc).__name__  # Use the exception's type name
         inheritance_list = ["PythonIssue", "IssueFromException", name]
-        issue = exception_to_issue(Exception)  # Use the existing function to create an issue from the exception
+        issue = exception_to_issue(exc)  # Use the existing function to create an issue from the exception
     else:
         # For non-exception issues, continue as normal
         inheritance_list = ["PythonIssue", name]
