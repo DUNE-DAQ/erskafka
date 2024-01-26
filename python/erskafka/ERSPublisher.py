@@ -45,8 +45,7 @@ def exception_to_issue(exc: Exception) -> ersissue.SimpleIssue:
     """Converts an exception to a SimpleIssue."""
     context = generate_context()
     current_time = time.time_ns()  # Get current time in nanoseconds
-    # Create the SimpleIssue with context and time only.
-    # The name and inheritance will be set in the create_issue function.
+
     return ersissue.SimpleIssue(
         context=context,
         name=type(exc).__name__,
@@ -62,7 +61,6 @@ def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO
     context = generate_context()
 
     frame = inspect.currentframe().f_back
-    module_name = inspect.getmodule(frame).__name__ if frame else __name__
 
     if exc:
         # If the issue is created from an exception, set the name and inheritance
@@ -82,13 +80,11 @@ def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO
         inheritance=inheritance_list
     )
 
-    # No need to explicitly initialize 'inheritance'; it's already an empty list by default
 
     issue_chain = ersissue.IssueChain(
         final=issue,
         session=os.getenv('DUNEDAQ_PARTITION', 'Unknown'),
-        application="python",
-        module=module_name
+        application="python"
     )
 
     # Process the cause and add to issue_chain.causes, but not to issue.inheritance
