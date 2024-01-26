@@ -51,7 +51,7 @@ def cli(kafka_address, kafka_port, number_of_issues, kafka_topic, session):
         raise ERSException("Custom ERS exception for testing create_issue!")
     except ERSException as e:
         print(f"Caught an ERSException: {e}")
-        issue_chain = erspub.create_issue(str(e), cause=e)
+        issue_chain = erspub.create_issue("Exception found!", cause=e)
         result = publisher.publish(issue_chain)
         print(f"Publishing issue from create_issue with exception: {'successful' if result else 'failed'}")
 
