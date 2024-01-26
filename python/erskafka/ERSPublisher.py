@@ -147,10 +147,5 @@ class ERSException(Exception):
         super().__init__(message)
         self.message = message
 
-# Usage example:
-# publisher = ERSPublisher(config)
-# publisher.publish_simple_message("This is a simple message.")
-# No need to manually close, but you can if desired:
-# publisher.close()
 
 
