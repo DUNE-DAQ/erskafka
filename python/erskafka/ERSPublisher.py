@@ -40,7 +40,7 @@ def generate_context():
         application_name="python"
     )
 
-def exception_to_issue(exc: Exception) -> ersissue.SimpleIssue:
+def exception_to_issue(exc: Exception, severity=SeverityLevel.WARNING.name) -> ersissue.SimpleIssue:
     """Converts an exception to a SimpleIssue."""
     context = generate_context()
     current_time = time.time_ns()  # Get current time in nanoseconds
@@ -50,7 +50,7 @@ def exception_to_issue(exc: Exception) -> ersissue.SimpleIssue:
         name=type(exc).__name__,
         message=str(exc),
         time=current_time,
-        severity=SeverityLevel.WARNING.name,  # Assuming exceptions are always considered WARNING level
+        severity=severity,
         inheritance=["PythonIssue", "IssueFromException", type(exc).__name__]
     )
 
@@ -63,21 +63,18 @@ def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO
 
     if exc:
         # If the issue is created from an exception, set the name and inheritance
-        name = type(exc).__name__  # Use the exception's type name
-        inheritance_list = ["PythonIssue", "IssueFromException", name]
-        issue = exception_to_issue(exc)  # Use the existing function to create an issue from the exception
+        issue = exception_to_issue(exc,severity)  # Use the existing function to create an issue from the exception
     else:
         # For non-exception issues, continue as normal
         inheritance_list = ["PythonIssue", name]
-
-    issue = ersissue.SimpleIssue(
-        context=context,
-        name=name,
-        message=message,
-        time=current_time,
-        severity=str(severity),
-        inheritance=inheritance_list
-    )
+        issue = ersissue.SimpleIssue(
+            context=context,
+            name=name,
+            message=message,
+            time=current_time,
+            severity=str(severity),
+            inheritance=inheritance_list
+        )
 
 
     issue_chain = ersissue.IssueChain(
@@ -90,7 +87,7 @@ def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO
     if cause:
         if isinstance(cause, Exception):
             # Convert exception to a SimpleIssue and append to causes of issue_chain
-            cause_issue = exception_to_issue(cause)
+            cause_issue = exception_to_issue(cause,severity)
             issue_chain.causes.extend([cause_issue])
         elif isinstance(cause, ersissue.SimpleIssue):
             # Add the cause directly to the causes of issue_chain
