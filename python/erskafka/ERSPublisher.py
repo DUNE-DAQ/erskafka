@@ -53,7 +53,7 @@ def exception_to_issue(exc: Exception) -> ersissue.SimpleIssue:
         message=str(exc),
         time=current_time,
         severity=SeverityLevel.WARNING.value,  # Assuming exceptions are always considered WARNING level
-        inheritance=["PythonIssue", type(exc).__name__]
+        inheritance=["PythonIssue", "IssueFromException", type(exc).__name__]
     )
 
 def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO.value, cause=None,exc=None):
