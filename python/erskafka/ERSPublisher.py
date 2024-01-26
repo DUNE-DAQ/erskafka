@@ -131,8 +131,8 @@ class ERSPublisher:
             key_serializer=lambda k: str(k).encode('utf-8')
             )
 
-    def publish_simple_message(self, message, severity=SeverityLevel.INFO.value, cause=None):
-        issue_chain = create_issue(message, severity=severity, cause=cause)
+    def publish_simple_message(self, message, severity=SeverityLevel.INFO.value, exc=None):
+        issue_chain = create_issue(message, severity=severity, exc=exc)
         return self.publish(issue_chain)
 
 
