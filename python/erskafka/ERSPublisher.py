@@ -12,7 +12,7 @@ class SeverityLevel(Enum):
     INFO = "INFO"
     WARNING = "WARNING"
     ERROR = "ERROR"
-    CRITICAL = "CRITICAL"
+    FATAL = "FATAL"
     DEBUG = "DEBUG"
 
 def generate_context():
