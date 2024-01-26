@@ -54,16 +54,19 @@ def exception_to_issue(exc: Exception, severity=SeverityLevel.WARNING.name) -> e
         inheritance=["PythonIssue", "IssueFromException", type(exc).__name__]
     )
 
-def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO.name, cause=None,exc=None):
+def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO.name, cause=None):
     """Create an ERS IssueChain with minimal user input."""
+    # This creates an issue chain with a given name, message, and severity. 
+    # The message can be a Python exception; in that case the name is also overwritten, with the name of the exception 
+    # The cause can be another issue (chain or simple) or an exception
     current_time = time.time_ns()
     context = generate_context()
 
     frame = inspect.currentframe().f_back
 
-    if exc:
+    if isinstance(message,Exception):
         # If the issue is created from an exception, set the name and inheritance
-        issue = exception_to_issue(exc,severity)  # Use the existing function to create an issue from the exception
+        issue = exception_to_issue(message,severity)  # Use the existing function to create an issue from the exception
     else:
         # For non-exception issues, continue as normal
         inheritance_list = ["PythonIssue", name]
@@ -122,8 +125,8 @@ class ERSPublisher:
             key_serializer=lambda k: str(k).encode('utf-8')
             )
 
-    def publish_simple_message(self, message, severity=SeverityLevel.INFO.name, exc=None):
-        issue_chain = create_issue(message, severity=severity, exc=exc)
+    def publish_simple_message(self, message, severity=SeverityLevel.INFO.name):
+        issue_chain = create_issue(message, severity=severity)
         return self.publish(issue_chain)
 
 

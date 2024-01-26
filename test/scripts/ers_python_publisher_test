@@ -33,7 +33,7 @@ def cli(kafka_address, kafka_port, number_of_issues, kafka_topic, session):
         raise ERSException("Custom ERS exception for testing publish_simple_message!")
     except ERSException as e:
         print(f"Caught an ERSException: {e}")
-        result = publisher.publish_simple_message(str(e), severity=SeverityLevel.WARNING.name, exc=e)
+        result = publisher.publish_simple_message(e, severity=SeverityLevel.WARNING.name)
         print(f"Publishing exception message: {'successful' if result else 'failed'}")
 
     # Test 3: create_issue without exception
