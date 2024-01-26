@@ -114,7 +114,6 @@ class ERSPublisher:
         base_topic = config.get('topic', 'ers_stream')  # Default to 'ers_stream'
 
         # The following code ensures that 'monitoring.' is prefixed if it's missing
-        # Adjust this block according to the correct logic
         if 'monitoring.' not in base_topic:
             base_topic = 'monitoring.' + base_topic
 
