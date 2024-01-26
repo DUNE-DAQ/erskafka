@@ -5,15 +5,14 @@ import ers.issue_pb2 as ersissue
 from datetime import datetime
 from kafka import KafkaProducer
 import time
+from enum import IntEnum, auto
 
-from enum import Enum
-
-class SeverityLevel(Enum):
-    INFO = "INFO"
-    WARNING = "WARNING"
-    ERROR = "ERROR"
-    FATAL = "FATAL"
-    DEBUG = "DEBUG"
+class SeverityLevel(IntEnum):
+    DEBUG = auto()
+    INFO = auto()
+    WARNING = auto()
+    ERROR = auto()
+    FATAL = auto()
 
 def generate_context():
     """Generate the context for an issue."""
@@ -51,11 +50,11 @@ def exception_to_issue(exc: Exception) -> ersissue.SimpleIssue:
         name=type(exc).__name__,
         message=str(exc),
         time=current_time,
-        severity=SeverityLevel.WARNING.value,  # Assuming exceptions are always considered WARNING level
+        severity=SeverityLevel.WARNING.name,  # Assuming exceptions are always considered WARNING level
         inheritance=["PythonIssue", "IssueFromException", type(exc).__name__]
     )
 
-def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO.value, cause=None,exc=None):
+def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO.name, cause=None,exc=None):
     """Create an ERS IssueChain with minimal user input."""
     current_time = time.time_ns()
     context = generate_context()
@@ -76,7 +75,7 @@ def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO
         name=name,
         message=message,
         time=current_time,
-        severity=severity,
+        severity=str(severity),
         inheritance=inheritance_list
     )
 
@@ -126,7 +125,7 @@ class ERSPublisher:
             key_serializer=lambda k: str(k).encode('utf-8')
             )
 
-    def publish_simple_message(self, message, severity=SeverityLevel.INFO.value, exc=None):
+    def publish_simple_message(self, message, severity=SeverityLevel.INFO.name, exc=None):
         issue_chain = create_issue(message, severity=severity, exc=exc)
         return self.publish(issue_chain)
 
@@ -146,6 +145,4 @@ class ERSException(Exception):
     def __init__(self, message):
         super().__init__(message)
         self.message = message
-
-
 
