@@ -42,11 +42,11 @@ def generate_context():
 
 def exception_to_issue(exc: Exception, severity=SeverityLevel.WARNING.name) -> ersissue.SimpleIssue:
     """Converts an exception to a SimpleIssue."""
-    context = generate_context()
+
     current_time = time.time_ns()  # Get current time in nanoseconds
 
     return ersissue.SimpleIssue(
-        context=context,
+        context=generate_context(),
         name=type(exc).__name__,
         message=str(exc),
         time=current_time,
@@ -59,26 +59,24 @@ def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO
     # This creates an issue chain with a given name, message, and severity 
     # The message can be a Python exception; in that case the name is also overwritten, with the name of the exception 
     # The cause can be another issue (chain or simple) or an exception
+    
     current_time = time.time_ns()
-    context = generate_context()
-
-    frame = inspect.currentframe().f_back
 
     if isinstance(message,Exception):
         # If the issue is created from an exception, set the name and inheritance
         issue = exception_to_issue(message,severity)  # Use the existing function to create an issue from the exception
+        issue.time = current_time # The time is overwritten as this is the time of the call of the function
     else:
         # For non-exception issues, continue as normal
         inheritance_list = ["PythonIssue", name]
         issue = ersissue.SimpleIssue(
-            context=context,
+            context=generate_context(),
             name=name,
             message=message,
             time=current_time,
             severity=str(severity),
             inheritance=inheritance_list
         )
-
 
     issue_chain = ersissue.IssueChain(
         final=issue,
