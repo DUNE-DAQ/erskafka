@@ -56,7 +56,7 @@ def exception_to_issue(exc: Exception, severity=SeverityLevel.WARNING.name) -> e
 
 def create_issue(message, name="GenericPythonIssue", severity=SeverityLevel.INFO.name, cause=None):
     """Create an ERS IssueChain with minimal user input."""
-    # This creates an issue chain with a given name, message, and severity. 
+    # This creates an issue chain with a given name, message, and severity 
     # The message can be a Python exception; in that case the name is also overwritten, with the name of the exception 
     # The cause can be another issue (chain or simple) or an exception
     current_time = time.time_ns()
