@@ -62,7 +62,6 @@ class  ERSSubscriber:
 
         if ( was_running and len(self.functions)>0 ) : self.start()
         return True
-
     def start(self):
         print("Starting run")
         self.running = True
@@ -109,5 +108,6 @@ class  ERSSubscriber:
                 print(e)
 
         print ("Stop")
+
 
         
