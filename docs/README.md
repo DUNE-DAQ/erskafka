@@ -18,7 +18,4 @@ export DUNEDAQ_ERS_WARNING="erstrace,throttle(30,100),lstderr,erskafka(dqmbroadc
 export DUNEDAQ_ERS_ERROR="erstrace,throttle(30,100),lstderr,erskafka(dqmbroadcast:9092)"
 export DUNEDAQ_ERS_FATAL="erstrace,lstderr,erskafka(dqmbroadcast:9092)"
 ```
-
-Default platform: https://dunedaqreporting.app.cern.ch/ErrorReports
-
-For any further information, contact Yann Donon (yann.donon@cern.ch).
+The current working configurations are found in [daqconf](https://github.com/DUNE-DAQ/daqconf/blob/develop/python/daqconf/core/conf_utils.py#L581-L586)
