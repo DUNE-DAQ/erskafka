@@ -1,0 +1,19 @@
+#!/usr/bin/env python3
+
+from erskafka.ERSLogHandler import ERSHandler
+import logging
+
+
+logger = logging.getLogger('test')
+logger.setLevel(logging.DEBUG)
+
+print(logger.handlers)
+ers = ERSHandler()
+ers.setLevel(logging.DEBUG)
+logger.addHandler(ers)
+print(logger.handlers)
+logger.debug("This is a debug message")
+logger.info("This is an info message")
+logger.warning("This is a warning message")
+logger.error("This is an error message")
+logger.critical("This is a critical message")

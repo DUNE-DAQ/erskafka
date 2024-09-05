@@ -32,6 +32,7 @@ def cli(kafka_address, kafka_port, number_of_issues, kafka_topic, session):
         print(f"Publish result for simple message {i}: {'successful' if result else 'failed'}")
         sleep(0.5)
 
+
     # Test 2: publish_simple_message with exception
     try:
         raise ERSException("Custom ERS exception for testing publish_simple_message!")
@@ -40,6 +41,16 @@ def cli(kafka_address, kafka_port, number_of_issues, kafka_topic, session):
         result = publisher.publish(e, severity=SeverityLevel.WARNING.name)
         print(f"Publishing exception message: {'successful' if result else 'failed'}")
 
+    class CustomException(ERSException):
+        pass
+
+    # Test 3: publish_simple_message with exception
+    try:
+        raise ERSException("Custom ERS exception for testing publish_simple_message!")
+    except ERSException as e:
+        print(f"Caught an ERSException: {e}")
+        result = publisher.publish(e, severity=SeverityLevel.WARNING.name)
+        print(f"Publishing exception message: {'successful' if result else 'failed'}")
     # # Test 3: create_issue without exception
     # for i in range(number_of_issues):
     #     message = f"Direct create_issue test with ID: {i}"
