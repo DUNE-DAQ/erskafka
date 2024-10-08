@@ -30,7 +30,7 @@ namespace erskafka
 
     m_publisher = std::make_unique<dunedaq::erskafka::ERSPublisher>(conf);
 
-    if(auto env_p = std::getenv("DUNEDAQ_PARTITION")) 
+    if(auto env_p = std::getenv("DUNEDAQ_SESSION")) 
       m_session = env_p;
 
     if (auto app_p = std::getenv("DUNEDAQ_APPLICATION_NAME"))
