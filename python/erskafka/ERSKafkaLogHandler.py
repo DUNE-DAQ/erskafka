@@ -33,7 +33,7 @@ class ERSKafkaLogHandler(logging.Handler):
         kafka_topic:str="ers_stream",
     ):
         super().__init__()
-        os.environ['DUNEDAQ_PARTITION'] = session
+        os.environ['DUNEDAQ_SESSION'] = session
         self.session:str = session
         self.kafka_address:str = kafka_address
         self.kafka_topic:str = kafka_topic

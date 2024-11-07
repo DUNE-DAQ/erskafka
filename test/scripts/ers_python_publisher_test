@@ -15,7 +15,7 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 @click.option('--session', type=click.STRING, default="session_tester", help="Name of the session")
 
 def cli(kafka_address, kafka_port, number_of_issues, kafka_topic, session):
-    os.environ['DUNEDAQ_PARTITION']=session
+    os.environ['DUNEDAQ_SESSION']=session
     bootstrap = f"{kafka_address}:{kafka_port}"
     publisher = erspub.ERSPublisher(
         bootstrap = bootstrap,

@@ -24,8 +24,8 @@ namespace erskafka
   erskafka::KafkaStream::KafkaStream(const std::string &param)
   {
 
-    if(const char* env_p = std::getenv("DUNEDAQ_PARTITION")) 
-      m_partition = env_p;
+    if(const char* env_p = std::getenv("DUNEDAQ_SESSION")) 
+      m_session = env_p;
   
     //Kafka server settings
     std::string brokers = param;
@@ -57,7 +57,7 @@ namespace erskafka
     try
     {
       nlohmann::json message;
-      message["partition"] = m_partition.c_str();
+      message["session"] = m_session.c_str();
       message["issue_name"] = issue.get_class_name();
       message["message"] = issue.message().c_str();
       message["severity"] = ers::to_string(issue.severity());

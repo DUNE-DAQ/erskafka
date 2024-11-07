@@ -24,7 +24,7 @@ int main( int argc, char * argv[] ) {
 
   std::string conf = "protobufstream(monkafka.cern.ch:30092)";
 
-  setenv("DUNEDAQ_PARTITION", "TestPartition",0);
+  setenv("DUNEDAQ_SESSION", "TestSession",0);
   setenv("DUNEDAQ_APPLICATION_NAME", "ERSStreamTest",0);
   
   auto stream = ers::StreamFactory::instance().create_out_stream( conf );

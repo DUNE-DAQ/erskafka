@@ -164,7 +164,7 @@ class ERSPublisher:
 
         issue_chain = ersissue.IssueChain(
             final=issue,
-            session=os.getenv('DUNEDAQ_PARTITION', 'Unknown'),
+            session=os.getenv('DUNEDAQ_SESSION', 'Unknown'),
             application="python"
         )
 

@@ -32,7 +32,7 @@ namespace erskafka
         void write( const ers::Issue & issue ) override;
         
       private:	
-        std::string m_partition;
+        std::string m_session;
         RdKafka::Producer *m_producer;
         void ers_to_json(const ers::Issue & issue, size_t chain, std::vector<nlohmann::json> & j_objs);
         void kafka_exporter(std::string input, std::string topic);

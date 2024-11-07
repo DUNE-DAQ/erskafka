@@ -6,9 +6,9 @@ Tell ERS to load the erskafka plugin:
 export DUNEDAQ_ERS_STREAM_LIBS=erskafka
 ```
 
-Set the partition name. The partition name allows to clearly distinguish the origin of the ERS messages, thus avoiding mixing information from different DAQ instances:
+Set the session name. The session name allows to clearly distinguish the origin of the ERS messages, thus avoiding mixing information from different DAQ instances:
 ```
-export DUNEDAQ_PARTITION=ChooseYourPartitionName
+export DUNEDAQ_SESSION=ChooseYourSessionName
 ```
 
 Extend the ERS variables which define the output streams to be used for Issues of different severities:
