@@ -1,0 +1,29 @@
+repos:
+  - repo: local
+    hooks:
+      - id: black
+        name: black (local)
+        entry: black
+        language: system
+        types: [python]
+        pass_filenames: true
+        additional_dependencies: []
+        fail_fast: false
+
+      - id: isort
+        name: isort (local)
+        entry: isort
+        language: system
+        types: [python]
+        pass_filenames: true
+        additional_dependencies: []
+        fail_fast: false
+
+      - id: ruff
+        name: ruff (local)
+        entry: ruff check
+        language: system
+        types: [python]
+        pass_filenames: true
+        additional_dependencies: []
+        fail_fast: false

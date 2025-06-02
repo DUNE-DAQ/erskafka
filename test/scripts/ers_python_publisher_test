@@ -1,67 +1,198 @@
 #!/usr/bin/env python3
-import erskafka.ERSPublisher as erspub
-from erskafka.ERSPublisher import ERSException, SeverityLevel  # import the custom exception and the SeverityLevel enum
-from time import sleep
-import click
+import logging
 import os
+from datetime import datetime
+from time import sleep
 
-CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
+import click
+import pytz
+from rich.console import Console
+from rich.logging import RichHandler
+from rich.theme import Theme
+
+from erskafka.ERSPublisher import ERSError, ERSPublisher, SeverityLevel
+
+CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
+CONSOLE_THEMES = Theme({"info": "dim cyan", "warning": "magenta", "danger": "bold red"})
+log_levels = {
+    "CRITICAL": logging.CRITICAL,
+    "ERROR": logging.ERROR,
+    "WARNING": logging.WARNING,
+    "INFO": logging.INFO,
+    "DEBUG": logging.DEBUG,
+    "NOTSET": logging.NOTSET,
+}
+log_format = "%(filename)s %(name)s %(message)s"
+date_time_format = "[%Y/%m/%d %H:%M:%S]"
+time_zone = pytz.utc
+
+
+class LoggingFormatter(logging.Formatter):
+    """Overwrites the logging formatter properties."""
+
+    def __init__(self) -> None:
+        """Overwrites the formatter's default date and time format and time zone."""
+        super().__init__(log_format, date_time_format)
+        self.tz = time_zone
+        self.datefmt = date_time_format
+
+    def formattime(self, record: logging.LogRecord, datefmt: str) -> str:
+        """Overwrites the record's default time format."""
+        date_time = datetime.fromtimestamp(record.created, self.tz)
+        return date_time.strftime(self.datefmt)
+
+    def format(self, record: logging.LogRecord) -> logging.LogRecord:
+        """Defines new format of record.
+        Things updated:
+        * Time structure to include date and time at pre-determined time_zone.
+        * Record filename.
+        * Formats record source.
+        * Component widths.
+        """
+        record.asctime = self.formattime(record, self.datefmt)
+        component_width = 30
+        file_lineno = f"{record.filename}:{record.lineno}"
+        record.filename = file_lineno.ljust(component_width)[:component_width]
+        component_width = 45
+        name_colon = f"{record.name}:"
+        if name_colon.startswith("drunc."):
+            name_colon = name_colon.replace("drunc.", "")
+        record.name = name_colon.ljust(component_width)[:component_width]
+        component_width = 10
+        level_name = record.levelname
+        record.levelname = level_name.ljust(component_width)[:component_width]
+        return super().format(record)
+
+
+try:
+    width = os.get_terminal_size()[0]
+except OSError:
+    width = 150
+
+handler = RichHandler(
+    console=Console(width=width),
+    omit_repeated_times=False,
+    markup=True,
+    rich_tracebacks=True,
+    show_path=False,
+    tracebacks_width=width,
+)
+handler.setFormatter(LoggingFormatter())
+log = logging.getLogger("create_python_dunedaq_package")
+log.addHandler(handler)
+
 
 @click.command(context_settings=CONTEXT_SETTINGS)
-@click.option('--kafka-address', type=click.STRING, default="monkafka.cern.ch", help="Address of the Kafka broker.")
-@click.option('--kafka-port', type=click.INT, default=30092, help='Port of the Kafka broker.')
-@click.option('--number-of-issues', type=click.INT, default=10, help='Number of issues to send.')
-@click.option('--kafka-topic', type=click.STRING, default="ers_stream", help="Name of the Kafka topic.")
-@click.option('--session', type=click.STRING, default="session_tester", help="Name of the session")
-
-def cli(kafka_address, kafka_port, number_of_issues, kafka_topic, session):
-    os.environ['DUNEDAQ_PARTITION']=session
+@click.option(
+    "--kafka-address",
+    type=click.STRING,
+    default="monkafka.cern.ch",
+    help="Address of the Kafka broker.",
+)
+@click.option(
+    "--kafka-port", type=click.INT, default=30092, help="Port of the Kafka broker."
+)
+@click.option(
+    "--number-of-issues", type=click.INT, default=10, help="Number of issues to send."
+)
+@click.option(
+    "--kafka-topic",
+    type=click.STRING,
+    default="ers_stream",
+    help="Name of the Kafka topic.",
+)
+@click.option(
+    "--session", type=click.STRING, default="session_tester", help="Name of the session"
+)
+@click.option(
+    "--session", type=click.STRING, default="session_tester", help="Name of the session"
+)
+@click.option(
+    "-l",
+    "--log-level",
+    type=click.Choice(log_levels.keys(), case_sensitive=False),
+    default="INFO",
+    help="Set the log level.",
+)
+def cli(
+    kafka_address: str,
+    kafka_port: int,
+    number_of_issues: int,
+    kafka_topic: str,
+    session: str,
+    log_level: str,
+) -> None:
+    """Interface for testing the python implementation of ERS publishing."""
+    log.setLevel(log_levels[log_level])
+    os.environ["DUNEDAQ_PARTITION"] = session
     bootstrap = f"{kafka_address}:{kafka_port}"
-    publisher = erspub.ERSPublisher(
-        bootstrap = bootstrap,
-        topic = kafka_topic,
-        application_name = "ers_python_publisher_test",
-        package_name = "erskafka",
+    publisher = ERSPublisher(
+        bootstrap=bootstrap,
+        topic=kafka_topic,
+        application_name="ers_python_publisher_test",
+        package_name="erskafka",
     )
 
     # Test 1: publish text messages
     for i in range(number_of_issues):
         message = f"Simple message with ID: {i}"
-        print(f"Publishing simple message {i}: {message}")
-        result = publisher.publish(message,severity=SeverityLevel((i%5)+1).name)
-        print(f"Publish result for simple message {i}: {'successful' if result else 'failed'}")
+        log.info("Publishing simple message %s: %s", i, message)
+        result = publisher.publish(message, severity=SeverityLevel((i % 5) + 1).name)
+        log.info(
+            "Publish result for simple message %s: %s",
+            i,
+            {"[green]successful[/green]" if result else "[red]failed[/red]"},
+        )
         sleep(0.5)
 
+    def test_native_exception() -> None:
+        err_msg = "Custom ERS exception for testing publish_simple_message!"
+        raise Exception(err_msg)  # noqa: TRY002
 
     # Test 2: publish with Exception
     try:
-        raise Exception("Custom ERS exception for testing publish_simple_message!")
+        test_native_exception()
     except Exception as e:
-        print(f"Caught an ERSException: {e}")
+        log.exception("Caught an ERSError: ")
         result = publisher.publish(e, severity=SeverityLevel.WARNING.name)
-        print(f"Publishing exception message: {'successful' if result else 'failed'}")
+        log.info(
+            "Publishing exception message: %s", {"successful" if result else "failed"}
+        )
 
-    class CustomException(ERSException):
+    class CustomError(ERSError):
         pass
 
-    # Test 3: publish with CustomException
+    def test_custom_exception() -> None:
+        err_msg = "Custom ERS exception for testing publish_simple_message!"
+        raise CustomError(err_msg)
+
+    # Test 3: publish with CustomError
     try:
-        raise CustomException("Custom ERS exception for testing publish_simple_message!")
+        test_custom_exception()
     except Exception as e:
-        print(f"Caught an ERSException: {e}")
+        log.exception("Caught an ERSError: ")
         result = publisher.publish(e, severity=SeverityLevel.WARNING.name)
-        print(f"Publishing exception message: {'successful' if result else 'failed'}")
+        log.info(
+            "Publishing exception message: %s", {"successful" if result else "failed"}
+        )
 
     # Test 4: publish text with exception as cause
-    for i in range(number_of_issues) :
+    for i in range(number_of_issues):
         try:
-            raise CustomException("I am an exception")
+            test_custom_exception()
         except Exception as e:
-            print(f"Caught an ERSException: {e}")
-            severity = SeverityLevel((i%5)+1).name
-            issue_chain = publisher.publish(f"Exception found, causing a severity of {severity}", severity=severity, cause=e)
-            print(f"Publishing issue from create_issue with exception: {'successful' if result else 'failed'}")
+            log.exception("Caught an ERSError")
+            severity = SeverityLevel((i % 5) + 1).name
+            issue_chain = publisher.publish(
+                f"Exception found, causing a severity of {severity}",
+                severity=severity,
+                cause=e,
+            )
+            log.info(
+                "Publishing issue from create_issue with exception: %s",
+                {"successful" if issue_chain else "failed"},
+            )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     cli()
-

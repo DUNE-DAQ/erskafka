@@ -1,0 +1,62 @@
+[tool.black]
+line-length = 88
+target-version = ["py310", "py311", "py312", "py313"]
+skip-magic-trailing-comma = true
+force-exclude = '''
+/( 
+    \.git
+  | \.github
+  | \.ruff_cache
+  | /cmake
+  | /docs
+  | /include
+  | /plugins
+  | /src
+  | /test
+  | /unittest
+)/
+'''
+
+[tool.isort]
+profile = "black"
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+lint.select = [
+    "D",    # pydocstyle - checks docstrings are correctly formatted
+    "E",    # pycodestyle - checks PEP8 compliance
+    "F",    # Pyflakes - detects syntax errors, unused imports and variables and function arguments
+    "I",    # isort - import sorting
+    "UP",   # pyupgrade - modern python
+    "RUF",  # ruff-specific rules
+    "ANN",  # flake8-annotations - enforces type annotations and correctly typed variables in function calls
+    "S",    # bandit - security checks
+    "N",    # pep8-naming - naming convention enforcement
+    "ERA",  # eradicate - removes commented out code
+    "B",    # flake8-bugbear - checks for likely bugs, design problems, performance issues, reliability traps, API misuse, and bad practices
+    "C4",   # flake8-comprehensions - clearer comprehensions
+    "A",    # flake8-builtins - detects shadowing of built-in names in code
+    "RET",  # flake8-return - checks return statement issues
+    "T20",  # flake8-print - raises issues with print statements in production code
+    "ISC",  # flake8-implicit-str-concat - raises issues with implicit string concatenation
+    "G",    # flake8-logging-format - raises issues with logging that are not % replaced
+    "TRY",  # tryceratops - automatically detects and fixes type issues
+    "T"     # check for TODOs
+]
+exclude = [
+    "build",
+    "include",
+    "src",
+    "unittest",
+    "plugins",
+    "schema",
+    "cmake"
+]
+lint.ignore = [
+    "D205",  # D205: Missing docstring in docstring sections
+    "D100",  # D100: Missing docstring in public module
+    "D104"   # D104: Missing docstring in public package
+]
+src = ["python", "scripts"]
+lint.pydocstyle.convention = "google"
