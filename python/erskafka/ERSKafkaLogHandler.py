@@ -74,6 +74,8 @@ class ERSKafkaLogHandler(logging.Handler):
                 line_number = record.lineno,
                 file_name = str(record.pathname),
                 function_name = str(record.funcName),
+                process_id=record.process,
+                # thread_id= record.thread, (record.thread doesn't really work..)
             )
         )
         if not success:
