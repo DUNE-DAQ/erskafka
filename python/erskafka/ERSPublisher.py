@@ -101,6 +101,7 @@ class ERSPublisher:
             host_name = socket.gethostname(),
             line_number = frame.f_lineno,
             user_name = os.getlogin(),
+            user_id = os.geteuid(),
             package_name = self.package_name,
             application_name = self.application_name,
         )
