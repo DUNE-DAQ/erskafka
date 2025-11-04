@@ -76,7 +76,10 @@ class ERSKafkaLogHandler(logging.Handler):
                 function_name = str(record.funcName),
                 process_id=record.process,
                 # thread_id= record.thread, (record.thread doesn't really work..)
+                #! Note to self, it seems that this doesnt work..
             )
         )
+        
+        self.publisher.producer.flush() #TODO: Formalise this..
         if not success:
             print(f'WARNING! Failed to publish: {record.msg} to Kafka')

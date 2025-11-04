@@ -166,7 +166,8 @@ class ERSPublisher:
         issue_chain = ersissue.IssueChain(
             final=issue,
             session=os.getenv('DUNEDAQ_PARTITION', 'Unknown'),
-            application="python"
+            application="python",
+            module="TO FILL" #TODO I think we have to ask Marco about this
         )
 
         # Process the cause and add to issue_chain.causes, but not to issue.inheritance
