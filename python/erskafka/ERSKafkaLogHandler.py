@@ -74,7 +74,12 @@ class ERSKafkaLogHandler(logging.Handler):
                 line_number = record.lineno,
                 file_name = str(record.pathname),
                 function_name = str(record.funcName),
+                process_id=record.process,
+                thread_id=0 # TODO: have better way of handling this. It should come from drunc etc. 
             )
         )
+        
+        #! publish returns a future, so a flush ensures the message is sent out
+        self.publisher.producer.flush()
         if not success:
             print(f'WARNING! Failed to publish: {record.msg} to Kafka')
