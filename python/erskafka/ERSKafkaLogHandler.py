@@ -70,7 +70,7 @@ class ERSKafkaLogHandler(logging.Handler):
             severity = ers_level.name,
             context_kwargs = dict(
                 package_name = str(record.module),
-                application_name = str(record.name),
+                application_name =record.app_name if hasattr(record, "app_name") else str(record.name),
                 line_number = record.lineno,
                 file_name = str(record.pathname),
                 function_name = str(record.funcName),
