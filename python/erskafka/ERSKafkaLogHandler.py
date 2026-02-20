@@ -31,12 +31,14 @@ class ERSKafkaLogHandler(logging.Handler):
         session:str="Unknown",
         kafka_address:str="monkafka.cern.ch:30092",
         kafka_topic:str="ers_stream",
+        app_name:str | None = None,
     ):
         super().__init__()
         os.environ['DUNEDAQ_PARTITION'] = session
         self.session:str = session
         self.kafka_address:str = kafka_address
         self.kafka_topic:str = kafka_topic
+        self.app_name = app_name
 
         self.publisher = ERSPublisher(
             bootstrap = kafka_address,
@@ -70,7 +72,7 @@ class ERSKafkaLogHandler(logging.Handler):
             severity = ers_level.name,
             context_kwargs = dict(
                 package_name = str(record.module),
-                application_name =record.app_name if hasattr(record, "app_name") else str(record.name),
+                application_name = self.app_name if self.app_name else str(record.name),
                 line_number = record.lineno,
                 file_name = str(record.pathname),
                 function_name = str(record.funcName),
