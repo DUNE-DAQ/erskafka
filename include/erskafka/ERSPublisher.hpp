@@ -22,43 +22,36 @@
 
 namespace dunedaq {
 
+namespace erskafka {
 
-  namespace erskafka {
-    
-    class ERSPublisher {
-      
-    public:
-      
-      ERSPublisher(const nlohmann::json& conf);
-      
-      ERSPublisher() = delete;
-      ERSPublisher(const ERSPublisher & ) = delete;
-      ERSPublisher & operator = (const ERSPublisher & ) = delete;
-      ERSPublisher(ERSPublisher && ) = delete;
-      ERSPublisher & operator = (ERSPublisher && ) = delete;
-      
-      ~ERSPublisher() {;}
-      
-      bool publish( dunedaq::ersschema::IssueChain && ) const;
-      // template<class Iterator>
-      // bool publish( Iterator begin, Iterator end) const;
-      
-    protected:
-      std::string topic( const dunedaq::ersschema::IssueChain & ) const {
-        return m_default_topic;
-      }
-      
-      std::string key( const dunedaq::ersschema::IssueChain & i ) const {
-	return i.session() ;
-      }
+class ERSPublisher
+{
 
-    private:
-        
-      std::unique_ptr<RdKafka::Producer> m_producer;
-      std::string m_default_topic = "monitoring.ers_stream";
+public:
+  ERSPublisher(const nlohmann::json& conf);
 
-    };
-}  // erskafka namespace 
-}  // dunedaq namespace
+  ERSPublisher() = delete;
+  ERSPublisher(const ERSPublisher&) = delete;
+  ERSPublisher& operator=(const ERSPublisher&) = delete;
+  ERSPublisher(ERSPublisher&&) = delete;
+  ERSPublisher& operator=(ERSPublisher&&) = delete;
 
-#endif  //ERSKAFKA_INCLUDE_ERSKAFKA_ERSPUBLISHER_HPP_
+  ~ERSPublisher() { ; }
+
+  bool publish(dunedaq::ersschema::IssueChain&&) const;
+  // template<class Iterator>
+  // bool publish( Iterator begin, Iterator end) const;
+
+protected:
+  std::string topic(const dunedaq::ersschema::IssueChain&) const { return m_default_topic; }
+
+  std::string key(const dunedaq::ersschema::IssueChain& i) const { return i.session(); }
+
+private:
+  std::unique_ptr<RdKafka::Producer> m_producer;
+  std::string m_default_topic = "monitoring.ers_stream";
+};
+} // erskafka namespace
+} // dunedaq namespace
+
+#endif // ERSKAFKA_INCLUDE_ERSKAFKA_ERSPUBLISHER_HPP_
